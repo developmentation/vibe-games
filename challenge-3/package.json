@@ -7,6 +7,7 @@
   "main": "server-1/index.js",
   "scripts": {
     "start": "node server-1/index.js",
+    "postinstall": "npm install --prefix ..",
     "dev": "nodemon --watch server-1 --watch ../lib --ext js,mjs,sql,json server-1/index.js",
     "dev:all": "concurrently --kill-others-on-fail --names server,sql -c blue,magenta \"nodemon --watch server-1 --watch ../lib --ext js,mjs,json server-1/index.js\" \"node server-1/scripts/migrate-on-change.mjs\"",
     "migrate": "node server-1/scripts/migrate.mjs",
