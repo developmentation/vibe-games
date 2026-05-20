@@ -1,181 +1,648 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Case Management Console</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <style>
-      html, body { height: 100%; }
-      body { font-family: ui-sans-serif, system-ui, sans-serif; }
-      [v-cloak] { display: none; }
-    </style>
-  </head>
-  <body class="bg-slate-50 text-slate-900">
-    <div id="app" v-cloak class="min-h-screen flex flex-col">
-      <header class="bg-white border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vibe Games</div>
-            <h1 class="text-xl font-bold">Case Management Console</h1>
-          </div>
-          <div class="flex items-center gap-3 text-xs text-slate-500">
-            <span class="inline-flex items-center gap-1.5">
-              <span :class="['inline-block w-2 h-2 rounded-full', health?.status === 'ok' ? 'bg-emerald-500' : 'bg-rose-500']"></span>
-              {{ health?.status || 'starting' }}
-            </span>
-            <span>{{ health?.service || '...' }}</span>
-          </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alberta Personalised Learning &middot; Staff Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <style>
+    [v-cloak] { display: none; }
+    body { font-family: ui-sans-serif, system-ui, sans-serif; }
+    .role-pill[data-active=teacher] { background: #1e40af; color: white; }
+    .role-pill[data-active=parent] { background: #047857; color: white; }
+    .role-pill[data-active=student] { background: #b45309; color: white; }
+    .badge { display:inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .b-struggling { background: #fee2e2; color: #b91c1c; }
+    .b-approaching { background: #fef3c7; color: #92400e; }
+    .b-at_grade { background: #e2e8f0; color: #334155; }
+    .b-excelling { background: #d1fae5; color: #065f46; }
+    .b-unknown { background: #f1f5f9; color: #64748b; }
+    .b-remediate { background: #fef3c7; color: #92400e; }
+    .b-on_grade { background: #e2e8f0; color: #334155; }
+    .b-accelerate { background: #d1fae5; color: #065f46; }
+    .b-complexity { background: #ede9fe; color: #5b21b6; }
+    .scroll-pane { max-height: calc(100vh - 240px); overflow-y: auto; }
+    pre.summary { white-space: pre-wrap; font-family: inherit; font-size: 14px; line-height: 1.55; background:#f8fafc; padding: 12px 14px; border-radius: 6px; border: 1px solid #e2e8f0; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+<div id="app" v-cloak class="min-h-screen flex flex-col">
+
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="/" class="text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-700">&larr; Home</a>
+        <div>
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Vibe Games &middot; Staff portal</div>
+          <h1 class="text-lg font-bold leading-tight">Alberta Personalised Learning</h1>
         </div>
-        <nav class="max-w-7xl mx-auto px-6 flex gap-6 text-sm">
-          <button
-            v-for="t in tabs" :key="t.id"
-            @click="activeTab = t.id"
-            :class="['py-3 border-b-2 -mb-px transition', activeTab === t.id ? 'border-slate-900 text-slate-900 font-medium' : 'border-transparent text-slate-500 hover:text-slate-700']">
-            {{ t.label }}
-          </button>
-        </nav>
-      </header>
+      </div>
 
-      <main class="flex-1">
-        <div class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-12 gap-6">
-          <aside class="col-span-12 md:col-span-3 space-y-4">
-            <div class="bg-white border border-slate-200 rounded-xl p-4">
-              <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Filters</div>
-              <div class="space-y-2 text-sm">
-                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Open</label>
-                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> In review</label>
-                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Escalated</label>
-                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Resolved</label>
-              </div>
-              <div class="mt-4 text-xs text-slate-400">Wired to live data once <code>PROMPT.md</code> is executed.</div>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-xl p-4">
-              <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Shortcuts</div>
-              <ul class="space-y-1 text-sm">
-                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/api/health">/api/health</a></li>
-                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/api/schema">/api/schema</a></li>
-                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/ui-1/">ui-1 (intake)</a></li>
-                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/ui-3/">ui-3 (reserved)</a></li>
-              </ul>
-            </div>
-          </aside>
-
-          <section class="col-span-12 md:col-span-9">
-            <div v-if="activeTab === 'queue'" class="bg-white border border-slate-200 rounded-xl">
-              <div class="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
-                <h2 class="text-sm font-semibold">Triage queue</h2>
-                <div class="flex items-center gap-2 text-xs">
-                  <input type="text" placeholder="Search" class="border border-slate-200 rounded-md px-2 py-1 text-sm" />
-                  <button class="px-3 py-1 rounded-md bg-slate-900 text-white">Refresh</button>
-                </div>
-              </div>
-              <div class="p-10 text-center text-sm text-slate-500">
-                <div class="text-2xl font-light text-slate-300 mb-2">Empty queue</div>
-                <p>The live work tray. The build replaces this with the per-challenge feed (draft cases, unclassified tickets, students flagged for intervention).</p>
-              </div>
-            </div>
-
-            <div v-if="activeTab === 'cases'" class="bg-white border border-slate-200 rounded-xl">
-              <div class="px-5 py-3 border-b border-slate-200">
-                <h2 class="text-sm font-semibold">Cases</h2>
-              </div>
-              <div class="divide-y divide-slate-100">
-                <div v-for="row in sampleRows" :key="row.id" class="px-5 py-3 flex items-center justify-between text-sm hover:bg-slate-50">
-                  <div>
-                    <div class="font-medium">{{ row.title }}</div>
-                    <div class="text-xs text-slate-500">{{ row.meta }}</div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs">{{ row.status }}</span>
-                    <button class="text-xs text-slate-500 hover:text-slate-900">Open</button>
-                  </div>
-                </div>
-              </div>
-              <div class="px-5 py-3 border-t border-slate-200 text-xs text-slate-400">
-                Placeholder rows. Replace with a live fetch in the build.
-              </div>
-            </div>
-
-            <div v-if="activeTab === 'workflow'" class="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 class="text-sm font-semibold mb-3">Workflow</h2>
-              <ol class="space-y-3 text-sm">
-                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">01</span><div><div class="font-medium">Intake</div><div class="text-slate-500 text-xs">Caseworker creates a case, drops documents, kicks off processing.</div></div></li>
-                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">02</span><div><div class="font-medium">Extraction</div><div class="text-slate-500 text-xs">Vertex Claude vision agent populates the eligibility profile. SSE surfaces each merge.</div></div></li>
-                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">03</span><div><div class="font-medium">Review</div><div class="text-slate-500 text-xs">Caseworker fills gaps, requests more info, moves to recommendation.</div></div></li>
-                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">04</span><div><div class="font-medium">Decision</div><div class="text-slate-500 text-xs">Approve, reject, or hand off to a specialist reviewer. Letter generated by Sonnet.</div></div></li>
-              </ol>
-            </div>
-
-            <div v-if="activeTab === 'analytics'" class="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 class="text-sm font-semibold mb-3">Analytics</h2>
-              <div class="grid grid-cols-3 gap-4">
-                <div class="border border-slate-200 rounded-lg p-4">
-                  <div class="text-xs text-slate-500">Throughput</div>
-                  <div class="text-2xl font-bold mt-1">&mdash;</div>
-                  <div class="text-xs text-slate-400 mt-1">cases per hour</div>
-                </div>
-                <div class="border border-slate-200 rounded-lg p-4">
-                  <div class="text-xs text-slate-500">Avg completeness</div>
-                  <div class="text-2xl font-bold mt-1">&mdash;</div>
-                  <div class="text-xs text-slate-400 mt-1">across open cases</div>
-                </div>
-                <div class="border border-slate-200 rounded-lg p-4">
-                  <div class="text-xs text-slate-500">Decisions today</div>
-                  <div class="text-2xl font-bold mt-1">&mdash;</div>
-                  <div class="text-xs text-slate-400 mt-1">approve, reject, refer</div>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="activeTab === 'settings'" class="bg-white border border-slate-200 rounded-xl p-6">
-              <h2 class="text-sm font-semibold mb-3">Settings</h2>
-              <dl class="grid grid-cols-2 gap-3 text-sm">
-                <dt class="text-slate-500">Service</dt><dd class="font-mono text-xs">{{ health?.service || '—' }}</dd>
-                <dt class="text-slate-500">Active UI</dt><dd class="font-mono text-xs">{{ health?.active_ui || '—' }}</dd>
-                <dt class="text-slate-500">Node</dt><dd class="font-mono text-xs">{{ health?.node_version || '—' }}</dd>
-                <dt class="text-slate-500">Uptime</dt><dd class="font-mono text-xs">{{ health?.uptime_seconds || 0 }}s</dd>
-              </dl>
-            </div>
-          </section>
-        </div>
-      </main>
-
-      <footer class="border-t border-slate-200 bg-white">
-        <div class="max-w-7xl mx-auto px-6 py-3 text-xs text-slate-500 flex items-center justify-between">
-          <span>Vibe Games hackathon prep</span>
-          <span>Caseworker console placeholder. Build per <code>PROMPT.md</code>.</span>
-        </div>
-      </footer>
+      <div class="flex items-center gap-3">
+        <a
+          href="/ui-2/watch.html"
+          class="watch-btn group inline-flex items-center gap-2 pl-3 pr-4 py-2 rounded-full text-white text-sm font-semibold shadow-md hover:shadow-lg transition"
+          style="background: linear-gradient(135deg, #ff7e3e 0%, #ff5a24 100%);"
+          title="60-second narrated story of why this platform exists"
+        >
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20 group-hover:bg-white/30 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 ml-0.5"><path d="M6.3 4.1a1 1 0 0 0-1.5.9v10a1 1 0 0 0 1.5.9l8.5-5a1 1 0 0 0 0-1.8l-8.5-5Z"/></svg>
+          </span>
+          <span class="flex flex-col items-start leading-tight">
+            <span class="text-[10px] uppercase tracking-wider text-white/80 font-medium">Watch</span>
+            <span class="text-[13px] font-semibold">The 60-second story</span>
+          </span>
+        </a>
+        <div class="text-xs text-slate-500 mr-2">Role:</div>
+        <button v-for="r in roles" :key="r"
+          class="role-pill px-3 py-1.5 rounded-full text-sm border border-slate-200"
+          :class="role === r ? 'shadow-inner' : 'bg-white text-slate-700 hover:bg-slate-50'"
+          :data-active="role === r ? r : ''"
+          @click="setRole(r)">{{ capitalize(r) }}</button>
+        <span class="ml-3 text-xs flex items-center gap-1.5">
+          <span :class="['inline-block w-2 h-2 rounded-full', health?.status === 'ok' ? 'bg-emerald-500' : 'bg-rose-500']"></span>
+          {{ health?.status || 'starting' }}
+        </span>
+      </div>
     </div>
+    <nav class="max-w-7xl mx-auto px-6 flex gap-5 text-sm border-t border-slate-100">
+      <button v-for="t in tabs" :key="t.id"
+        @click="setTab(t.id)"
+        :class="['py-2.5 border-b-2 -mb-px transition', tab === t.id ? 'border-slate-900 text-slate-900 font-medium' : 'border-transparent text-slate-500 hover:text-slate-700']">
+        {{ t.label }}
+      </button>
+    </nav>
+  </header>
 
-    <script>
-      const { createApp, ref, onMounted } = Vue;
-      createApp({
-        setup() {
-          const health = ref(null);
-          const activeTab = ref('queue');
-          const tabs = [
-            { id: 'queue', label: 'Queue' },
-            { id: 'cases', label: 'Cases' },
-            { id: 'workflow', label: 'Workflow' },
-            { id: 'analytics', label: 'Analytics' },
-            { id: 'settings', label: 'Settings' },
-          ];
-          const sampleRows = [
-            { id: 1, title: 'Placeholder row A', meta: 'Replace with live API data in the build', status: 'draft' },
-            { id: 2, title: 'Placeholder row B', meta: 'Replace with live API data in the build', status: 'in_review' },
-            { id: 3, title: 'Placeholder row C', meta: 'Replace with live API data in the build', status: 'escalated' },
-          ];
-          onMounted(async () => {
-            try { health.value = (await axios.get('/api/health')).data; } catch { health.value = { status: 'unreachable' }; }
+  <main class="flex-1 max-w-7xl mx-auto px-6 py-6 w-full">
+
+    <section v-if="tab === 'roster'" class="grid grid-cols-12 gap-6">
+      <aside class="col-span-12 md:col-span-3 space-y-3">
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Filters</div>
+          <label class="text-xs text-slate-500">Search</label>
+          <input v-model="filters.q" type="text" placeholder="Name or ASIN"
+            class="w-full mt-0.5 mb-2 px-2 py-1 border border-slate-200 rounded-md text-sm" @keyup.enter="loadRoster">
+          <label class="text-xs text-slate-500">Grade</label>
+          <select v-model="filters.grade" class="w-full mt-0.5 mb-2 px-2 py-1 border border-slate-200 rounded-md text-sm">
+            <option value="">Any</option>
+            <option v-for="g in grades" :key="g" :value="g">{{ g === 'K' ? 'Kindergarten' : 'Grade ' + g }}</option>
+          </select>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" v-model="filters.complexity"> With complexity flags</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" v-model="filters.struggling"> Currently struggling</label>
+          <button class="mt-3 w-full bg-slate-900 text-white text-sm rounded-md py-1.5" @click="loadRoster">Apply</button>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 text-xs">
+          <div class="font-semibold text-slate-700 mb-1">Caseload</div>
+          <div class="text-slate-500">{{ roster.length }} of {{ rosterTotal }} students shown</div>
+        </div>
+      </aside>
+
+      <section class="col-span-12 md:col-span-9 bg-white border border-slate-200 rounded-xl">
+        <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+          <h2 class="font-semibold">Student roster</h2>
+          <div class="text-xs text-slate-500">{{ rosterLoading ? 'Loading...' : ('Showing ' + roster.length) }}</div>
+        </div>
+        <div class="scroll-pane divide-y divide-slate-100">
+          <button v-for="s in roster" :key="s.id" @click="openStudent(s.id)"
+            class="w-full text-left px-5 py-3 hover:bg-slate-50 grid grid-cols-12 gap-3 items-center">
+            <div class="col-span-4">
+              <div class="font-medium">{{ s.first_name }} {{ s.last_name }}</div>
+              <div class="text-xs text-slate-500 font-mono">ASIN {{ s.asin }} &middot; {{ s.school_division }}</div>
+            </div>
+            <div class="col-span-2 text-sm">{{ s.current_grade === 'K' ? 'Kindergarten' : 'Grade ' + s.current_grade }}</div>
+            <div class="col-span-3 flex flex-wrap gap-1">
+              <span v-if="s.has_complexity" class="badge b-complexity">complexity</span>
+              <span v-if="s.struggling_terms > 0" class="badge b-struggling">{{ s.struggling_terms }} struggling</span>
+              <span v-if="s.excelling_terms > 0" class="badge b-excelling">{{ s.excelling_terms }} excelling</span>
+            </div>
+            <div class="col-span-3 text-right text-xs text-slate-500">
+              {{ s.plan_count }} plan<span v-if="s.plan_count !== 1">s</span>
+              <span v-if="s.last_plan_at"> &middot; latest {{ shortDate(s.last_plan_at) }}</span>
+            </div>
+          </button>
+          <div v-if="!roster.length && !rosterLoading" class="px-5 py-12 text-center text-sm text-slate-500">No students match these filters.</div>
+        </div>
+      </section>
+    </section>
+
+    <section v-if="tab === 'student' && student" class="grid grid-cols-12 gap-6">
+      <aside class="col-span-12 md:col-span-4 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <button @click="setTab('roster')" class="text-xs text-slate-500 hover:text-slate-900">&larr; Back to roster</button>
+          <h2 class="text-xl font-bold mt-2">{{ student.student.first_name }} {{ student.student.last_name }}</h2>
+          <div class="text-sm text-slate-600 mt-1">{{ student.student.current_grade === 'K' ? 'Kindergarten' : 'Grade ' + student.student.current_grade }} &middot; {{ student.student.school_name }}</div>
+          <div class="text-xs text-slate-500 mt-1 font-mono">ASIN {{ student.student.asin }}</div>
+          <div class="mt-3 flex flex-wrap gap-1.5">
+            <span v-for="f in (student.student.complexity_profile?.flags || [])" :key="f" class="badge b-complexity">{{ f }}</span>
+          </div>
+          <div v-if="(student.student.complexity_profile?.supports || []).length" class="mt-3">
+            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Supports</div>
+            <div class="text-xs text-slate-600">{{ (student.student.complexity_profile?.supports || []).join(', ') }}</div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <h3 class="font-semibold mb-2">Subject snapshot</h3>
+          <div v-for="ss in student.subject_stats" :key="ss.subject_code" class="flex items-center justify-between py-1 text-sm">
+            <div>{{ subjectName(ss.subject_code) }}</div>
+            <div class="flex items-center gap-2">
+              <span v-if="ss.last_two_avg != null" class="font-mono tabular-nums text-xs text-slate-600">{{ ss.last_two_avg }}%</span>
+              <span :class="['badge b-' + ss.status]">{{ ss.status.replace('_',' ') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5" v-if="student.iep_notes.length">
+          <h3 class="font-semibold mb-2">Teacher commentary</h3>
+          <div v-for="n in student.iep_notes" :key="n.id" class="mb-3 last:mb-0">
+            <div class="text-xs uppercase tracking-wide text-slate-500 mb-0.5">{{ n.note_type }}</div>
+            <div class="text-sm text-slate-700 whitespace-pre-wrap">{{ n.body_markdown }}</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-span-12 md:col-span-8 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <h3 class="font-semibold">Generate a personalised course pack</h3>
+          <p class="text-sm text-slate-600 mt-1">Pick the audience and the subjects to plan for. The agent reads the student's last-two-term averages, pulls Alberta curriculum outcomes at the target grade, and writes a plan that cites real outcome codes.</p>
+
+          <div class="grid grid-cols-12 gap-3 mt-4">
+            <div class="col-span-12 md:col-span-4">
+              <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Audience</div>
+              <div class="flex gap-2">
+                <button v-for="a in ['teacher','parent','student']" :key="a"
+                  @click="plan.audience = a"
+                  :class="['px-3 py-1.5 rounded-md text-sm border', plan.audience === a ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-700']">{{ capitalize(a) }}</button>
+              </div>
+            </div>
+            <div class="col-span-12 md:col-span-4">
+              <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Horizon (weeks)</div>
+              <input type="number" min="1" max="12" v-model.number="plan.horizon_weeks" class="w-24 px-2 py-1.5 border border-slate-200 rounded-md">
+            </div>
+            <div class="col-span-12 md:col-span-4 flex md:items-end">
+              <button @click="generatePlan" :disabled="plan.generating"
+                class="w-full md:w-auto px-4 py-2 rounded-md bg-slate-900 text-white text-sm font-medium disabled:bg-slate-400">
+                {{ plan.generating ? 'Generating ...' : 'Generate plan' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Subjects ({{ plan.subjects.length }} selected)</div>
+            <div class="flex flex-wrap gap-2">
+              <button v-for="s in allSubjects" :key="s"
+                @click="toggleSubject(s)"
+                :class="['px-2.5 py-1 rounded-md text-xs border', plan.subjects.includes(s) ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-white border-slate-200 text-slate-600']">{{ s }} &mdash; {{ subjectName(s) }}</button>
+            </div>
+          </div>
+
+          <div v-if="plan.error" class="mt-3 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-2">{{ plan.error }}</div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5" v-if="student.plans.length">
+          <h3 class="font-semibold mb-2">Plans on file</h3>
+          <div class="divide-y divide-slate-100">
+            <button v-for="p in student.plans" :key="p.id" @click="openPlan(p.id)" class="w-full text-left py-2 hover:bg-slate-50 grid grid-cols-12 gap-3 items-center">
+              <div class="col-span-4 text-sm">{{ shortDate(p.generated_at) }}</div>
+              <div class="col-span-3 text-sm capitalize">{{ p.audience }}</div>
+              <div class="col-span-2 text-xs text-slate-500">{{ p.horizon_weeks }}w horizon</div>
+              <div class="col-span-3 text-xs text-slate-500 truncate">{{ p.summary_markdown ? p.summary_markdown.slice(0, 80) : '(no summary)' }}</div>
+            </button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section v-if="tab === 'plan' && currentPlan" class="grid grid-cols-12 gap-6">
+      <aside class="col-span-12 md:col-span-4 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <button @click="back()" class="text-xs text-slate-500 hover:text-slate-900">&larr; Back</button>
+          <h2 class="text-xl font-bold mt-2">Course pack</h2>
+          <div class="text-sm text-slate-600 mt-1">
+            <div>For audience: <span class="capitalize font-semibold">{{ currentPlan.plan.audience }}</span></div>
+            <div>Horizon: {{ currentPlan.plan.horizon_weeks }} weeks</div>
+            <div>Generated: {{ shortDate(currentPlan.plan.generated_at) }}</div>
+          </div>
+
+          <div class="mt-4 space-y-2">
+            <button @click="generateAudio" :disabled="audio.generating"
+              class="w-full px-3 py-2 rounded-md bg-emerald-700 text-white text-sm font-medium disabled:bg-emerald-300">
+              {{ audio.generating ? 'Narrating ...' : 'Generate audio narration' }}
+            </button>
+            <button @click="generateImage" :disabled="image.generating"
+              class="w-full px-3 py-2 rounded-md bg-indigo-700 text-white text-sm font-medium disabled:bg-indigo-300">
+              {{ image.generating ? 'Illustrating ...' : 'Generate cover image' }}
+            </button>
+          </div>
+
+          <div v-if="audio.error" class="mt-3 text-xs text-rose-700">{{ audio.error }}</div>
+          <div v-if="image.error" class="mt-3 text-xs text-rose-700">{{ image.error }}</div>
+
+          <div v-if="planMedia.audio.length" class="mt-4 space-y-2">
+            <div class="text-xs font-semibold uppercase text-slate-500">Narrations</div>
+            <div v-for="m in planMedia.audio" :key="m.id">
+              <div class="text-xs text-slate-600 mb-1">{{ m.title }}</div>
+              <audio :src="m.bytes_url" controls class="w-full"></audio>
+            </div>
+          </div>
+
+          <div v-if="planMedia.images.length" class="mt-4 space-y-2">
+            <div class="text-xs font-semibold uppercase text-slate-500">Illustrations</div>
+            <div v-for="m in planMedia.images" :key="m.id" class="border border-slate-200 rounded overflow-hidden">
+              <img :src="m.bytes_url" alt="" class="w-full block">
+              <div class="px-2 py-1 text-xs text-slate-500">{{ m.title }}</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="col-span-12 md:col-span-8 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <h3 class="font-semibold mb-2">Summary</h3>
+          <pre class="summary">{{ currentPlan.plan.summary_markdown }}</pre>
+        </div>
+
+        <div v-for="sec in currentPlan.sections" :key="sec.id" class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="font-semibold">{{ subjectName(sec.subject_code) }} <span class="text-xs font-normal text-slate-500">({{ sec.subject_code }})</span></h3>
+              <div class="text-xs text-slate-500 mt-0.5">Current Grade {{ sec.current_grade }} &rarr; Target Grade {{ sec.target_grade }} &middot; recent avg {{ sec.current_avg_percent ?? 'n/a' }}%</div>
+            </div>
+            <span :class="['badge b-' + sec.direction]">{{ sec.direction.replace('_',' ') }}</span>
+          </div>
+          <div class="text-sm text-slate-700 mt-2 whitespace-pre-wrap">{{ sec.rationale_markdown }}</div>
+
+          <div class="mt-3" v-if="sec.outcomes_json && sec.outcomes_json.length">
+            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Curriculum outcomes</div>
+            <div class="space-y-1.5">
+              <div v-for="o in sec.outcomes_json" :key="o.code" class="text-sm border-l-2 border-slate-200 pl-3">
+                <div class="font-mono text-xs text-slate-500">{{ o.code }}</div>
+                <div class="font-medium">{{ o.title }}</div>
+                <div class="text-slate-600 text-sm">{{ o.why }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3" v-if="sec.activities_json && sec.activities_json.length">
+            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Suggested activities</div>
+            <ul class="space-y-1">
+              <li v-for="a in sec.activities_json" :key="a.title" class="text-sm">
+                <span class="inline-block px-1.5 py-0.5 text-[10px] rounded bg-slate-100 text-slate-600 mr-2 uppercase tracking-wide">{{ a.modality }}</span>
+                <span class="font-medium">{{ a.title }}</span>
+                <span class="text-xs text-slate-500"> &middot; {{ a.minutes }} min</span>
+                <span v-if="a.materials && a.materials.length" class="text-xs text-slate-500"> &middot; {{ a.materials.join(', ') }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <h3 class="font-semibold">Ask a follow-up</h3>
+          <p class="text-xs text-slate-500 mt-1">Conversational Claude over this student's record and plan. Audience: <span class="capitalize font-medium">{{ role }}</span>.</p>
+          <div v-for="(m, idx) in chat.messages" :key="idx" class="mt-3">
+            <div v-if="m.role === 'user'" class="text-sm"><span class="font-semibold text-slate-700">You:</span> {{ m.text }}</div>
+            <div v-else class="text-sm whitespace-pre-wrap"><span class="font-semibold text-emerald-700">Assistant:</span> {{ m.text }}</div>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <input v-model="chat.draft" @keyup.enter="sendChat" type="text" placeholder="e.g. What should I focus on first?" class="flex-1 px-3 py-2 border border-slate-200 rounded-md text-sm">
+            <button @click="sendChat" :disabled="chat.sending || !chat.draft" class="px-3 py-2 rounded-md bg-slate-900 text-white text-sm disabled:bg-slate-400">{{ chat.sending ? '...' : 'Ask' }}</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section v-if="tab === 'help'" class="bg-white border border-slate-200 rounded-xl p-6">
+      <h2 class="text-xl font-bold">How the staff portal works</h2>
+      <p class="text-sm text-slate-700 mt-1">A short tour of what each screen does and how the AI is wired up underneath.</p>
+
+      <h3 class="font-semibold mt-4">1. Roster</h3>
+      <p class="text-sm text-slate-700">100 synthetic Alberta K-12 students with ASIN, grade level, complexity flags, and three years of term-by-term marks. Filter by grade, complexity, or struggling status.</p>
+
+      <h3 class="font-semibold mt-4">2. Student detail</h3>
+      <p class="text-sm text-slate-700">Pick a student to see their subject snapshot (last-two-term averages with a status badge), complexity supports, and teacher commentary from the iep_notes table.</p>
+
+      <h3 class="font-semibold mt-4">3. Plan generator</h3>
+      <p class="text-sm text-slate-700">Pick audience and subjects. The agent runs two steps:</p>
+      <ul class="text-sm text-slate-700 list-disc pl-5">
+        <li>Per subject, compute the last-two-term average. Pick a direction: remediate (under 60), on-grade, or accelerate (88 or above). Set a target grade by shifting from current grade.</li>
+        <li>Pull the top curriculum outcomes for the target grade from the read-only LearnAlberta.ca mirror. Hand to Vertex Claude Sonnet with a tool-use schema. The LLM picks 3-5 outcomes per subject from the candidate set (no inventing codes) and proposes 2-3 activities.</li>
+      </ul>
+
+      <h3 class="font-semibold mt-4">4. Multi-modal output</h3>
+      <p class="text-sm text-slate-700">From a generated plan, produce a narrated audio version with the custom ElevenLabs voice and a cover image with OpenAI gpt-image-1. Both persist as BYTEA in Postgres; playback works directly off /api/media/:id/bytes.</p>
+
+      <h3 class="font-semibold mt-4">5. Conversational helper</h3>
+      <p class="text-sm text-slate-700">A chat box over the student record plus the latest plan summary. The system prompt tunes to the current role (teacher / parent / student). Replies are capped under 200 words.</p>
+
+      <h3 class="font-semibold mt-4">API surface</h3>
+      <table class="text-sm w-full border-collapse">
+        <thead><tr class="text-left bg-slate-50"><th class="px-2 py-1">Method</th><th class="px-2 py-1">Path</th><th class="px-2 py-1">Purpose</th></tr></thead>
+        <tbody>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/health</td><td class="px-2 py-1">Service + DB ping</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/curriculum/subjects</td><td class="px-2 py-1">List curriculum subjects</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/curriculum/courses?subject=</td><td class="px-2 py-1">Courses (grades) per subject</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/curriculum/outcomes</td><td class="px-2 py-1">Outcome search</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/students</td><td class="px-2 py-1">Roster (filterable)</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/students/:id</td><td class="px-2 py-1">Student + grade history + notes + plans</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">POST</td><td class="px-2 py-1 font-mono">/api/plans/:student_id</td><td class="px-2 py-1">Generate a plan</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/plans/:id</td><td class="px-2 py-1">Plan + sections + media</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">POST</td><td class="px-2 py-1 font-mono">/api/media/audio</td><td class="px-2 py-1">Generate ElevenLabs TTS (persists BYTEA)</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">POST</td><td class="px-2 py-1 font-mono">/api/media/images</td><td class="px-2 py-1">Generate OpenAI image (persists BYTEA)</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">GET</td><td class="px-2 py-1 font-mono">/api/media/:id/bytes</td><td class="px-2 py-1">Stream the asset bytes</td></tr>
+          <tr class="border-t border-slate-100"><td class="px-2 py-1 font-mono">POST</td><td class="px-2 py-1 font-mono">/api/ai/chat</td><td class="px-2 py-1">Conversational Claude over student + plan</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section v-if="tab === 'costs'" class="bg-white border border-slate-200 rounded-xl p-6">
+      <h2 class="text-xl font-bold mb-2">Per-pack cost calculator</h2>
+      <p class="text-sm text-slate-700 mb-4">Adjust the assumptions; the totals update live. List prices as of January 2026.</p>
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-6 space-y-2">
+          <div class="grid grid-cols-2 gap-3 items-center"><label class="text-sm">Plans per day per family</label><div class="text-sm">{{ cost.plans_per_day }}</div></div>
+          <input type="range" min="0" max="5" step="1" v-model.number="cost.plans_per_day" class="w-full">
+
+          <div class="grid grid-cols-2 gap-3 items-center"><label class="text-sm">Audio narrations per plan</label><div class="text-sm">{{ cost.audio_per_plan }}</div></div>
+          <input type="range" min="0" max="3" step="1" v-model.number="cost.audio_per_plan" class="w-full">
+
+          <div class="grid grid-cols-2 gap-3 items-center"><label class="text-sm">Images per plan</label><div class="text-sm">{{ cost.images_per_plan }}</div></div>
+          <input type="range" min="0" max="4" step="1" v-model.number="cost.images_per_plan" class="w-full">
+
+          <div class="grid grid-cols-2 gap-3 items-center"><label class="text-sm">AI follow-up questions per day</label><div class="text-sm">{{ cost.chats_per_day }}</div></div>
+          <input type="range" min="0" max="20" step="1" v-model.number="cost.chats_per_day" class="w-full">
+
+          <div class="grid grid-cols-2 gap-3 items-center"><label class="text-sm">Active days per month</label><div class="text-sm">{{ cost.days_per_month }}</div></div>
+          <input type="range" min="1" max="30" step="1" v-model.number="cost.days_per_month" class="w-full">
+        </div>
+        <div class="col-span-12 md:col-span-6">
+          <table class="w-full text-sm border border-slate-200 rounded">
+            <thead class="bg-slate-50 text-slate-600 text-xs uppercase"><tr><th class="px-2 py-1 text-left">Cadence</th><th class="text-right px-2">Plans</th><th class="text-right px-2">Audio</th><th class="text-right px-2">Images</th><th class="text-right px-2">Chats</th><th class="text-right px-2">USD</th></tr></thead>
+            <tbody>
+              <tr class="border-t border-slate-100"><td class="px-2 py-1">Per day</td><td class="text-right px-2">{{ costRow(1).plans }}</td><td class="text-right px-2">{{ costRow(1).audio }}</td><td class="text-right px-2">{{ costRow(1).images }}</td><td class="text-right px-2">{{ costRow(1).chats }}</td><td class="text-right px-2 font-mono">${{ costRow(1).total.toFixed(2) }}</td></tr>
+              <tr class="border-t border-slate-100"><td class="px-2 py-1">Per week</td><td class="text-right px-2">{{ costRow(7).plans }}</td><td class="text-right px-2">{{ costRow(7).audio }}</td><td class="text-right px-2">{{ costRow(7).images }}</td><td class="text-right px-2">{{ costRow(7).chats }}</td><td class="text-right px-2 font-mono">${{ costRow(7).total.toFixed(2) }}</td></tr>
+              <tr class="border-t border-slate-100 bg-slate-50 font-semibold"><td class="px-2 py-1">Per month</td><td class="text-right px-2">{{ costRow(cost.days_per_month).plans }}</td><td class="text-right px-2">{{ costRow(cost.days_per_month).audio }}</td><td class="text-right px-2">{{ costRow(cost.days_per_month).images }}</td><td class="text-right px-2">{{ costRow(cost.days_per_month).chats }}</td><td class="text-right px-2 font-mono">${{ costRow(cost.days_per_month).total.toFixed(2) }}</td></tr>
+            </tbody>
+          </table>
+          <div class="text-xs text-slate-500 mt-3">
+            Unit prices: plan $0.026, audio $0.27, image $0.04, chat $0.015.
+            Caching shared audio across siblings and reusing illustrations per class brings the practical per-student cost lower.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-6 py-3 text-xs text-slate-500 flex items-center justify-between">
+      <span>Internal staff portal</span>
+      <span>Vue 3 &middot; Node + Express &middot; Postgres &middot; Vertex Claude &middot; OpenAI &middot; ElevenLabs</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const { createApp, ref, computed, onMounted } = Vue;
+
+  const ALL_SUBJECTS = ['ELA','MAT','SCI','SOC','PHE','FLA','FNA','CTF','CTS'];
+  const SUBJECT_NAMES = {
+    ELA: 'English Language Arts', MAT: 'Mathematics', SCI: 'Science', SOC: 'Social Studies',
+    PHE: 'Physical Education', FLA: 'French Language Arts', FNA: 'Fine Arts',
+    CTF: 'Career and Technology Foundations', CTS: 'Career and Technology Studies',
+  };
+  const GRADES = ['K','1','2','3','4','5','6','7','8','9','10','11','12'];
+
+  createApp({
+    setup() {
+      const role = ref(localStorage.getItem('alpl_role') || 'teacher');
+      const roles = ['teacher','parent','student'];
+
+      const tab = ref('roster');
+      const currentStudentId = ref(null);
+      const currentPlanId = ref(null);
+
+      const tabs = computed(() => ([
+        { id: 'roster', label: role.value === 'student' ? 'My profile' : 'Students' },
+        ...(currentStudentId.value ? [{ id: 'student', label: 'Student detail' }] : []),
+        ...(currentPlanId.value   ? [{ id: 'plan',    label: 'Course pack' }] : []),
+        { id: 'help', label: 'How it works' },
+        { id: 'costs', label: 'Costs' },
+      ]));
+      function setTab(t) { tab.value = t; updateHash(); }
+      function setRole(r) {
+        role.value = r;
+        localStorage.setItem('alpl_role', r);
+        if (plan.value) plan.value.audience = r;
+      }
+      function updateHash() {
+        const parts = [tab.value];
+        if (tab.value === 'student' && currentStudentId.value) parts.push(currentStudentId.value);
+        if (tab.value === 'plan' && currentPlanId.value) parts.push(currentPlanId.value);
+        location.hash = parts.join('/');
+      }
+
+      const health = ref(null);
+      const filters = ref({ q: '', grade: '', complexity: false, struggling: false });
+      const roster = ref([]);
+      const rosterTotal = ref(0);
+      const rosterLoading = ref(false);
+
+      async function loadRoster() {
+        rosterLoading.value = true;
+        const params = { limit: 200 };
+        if (filters.value.q) params.q = filters.value.q;
+        if (filters.value.grade) params.grade = filters.value.grade;
+        if (filters.value.complexity) params.complexity = 'true';
+        if (filters.value.struggling) params.struggling = 'true';
+        try {
+          const r = await axios.get('/api/students', { params });
+          roster.value = r.data.items || [];
+          rosterTotal.value = r.data.total || 0;
+        } finally {
+          rosterLoading.value = false;
+        }
+      }
+
+      const student = ref(null);
+      async function openStudent(id) {
+        currentStudentId.value = id;
+        student.value = null;
+        try {
+          const r = await axios.get('/api/students/' + id);
+          student.value = r.data;
+          plan.value = { audience: role.value, horizon_weeks: 4, subjects: r.data.subject_stats.map(s => s.subject_code), generating: false, error: '' };
+          setTab('student');
+        } catch (e) { console.error(e); }
+      }
+
+      const plan = ref(null);
+      function toggleSubject(s) {
+        if (!plan.value) return;
+        const i = plan.value.subjects.indexOf(s);
+        if (i >= 0) plan.value.subjects.splice(i, 1); else plan.value.subjects.push(s);
+      }
+      async function generatePlan() {
+        if (!plan.value) return;
+        plan.value.generating = true;
+        plan.value.error = '';
+        try {
+          const r = await axios.post('/api/plans/' + currentStudentId.value, {
+            audience: plan.value.audience,
+            subjects: plan.value.subjects,
+            horizon_weeks: plan.value.horizon_weeks,
           });
-          return { health, activeTab, tabs, sampleRows };
-        },
-      }).mount('#app');
-    </script>
-  </body>
+          await openPlan(r.data.plan_id);
+        } catch (e) {
+          plan.value.error = (e?.response?.data?.detail || e?.message || String(e));
+        } finally {
+          plan.value.generating = false;
+        }
+      }
+
+      const currentPlan = ref(null);
+      const planMedia = computed(() => {
+        const out = { audio: [], images: [] };
+        if (!currentPlan.value || !currentPlan.value.media) return out;
+        for (const m of currentPlan.value.media) {
+          if (m.kind === 'audio') out.audio.push(m);
+          else if (m.kind === 'image') out.images.push(m);
+        }
+        return out;
+      });
+
+      async function openPlan(id) {
+        currentPlanId.value = id;
+        currentPlan.value = null;
+        chat.value.messages = [];
+        try {
+          const r = await axios.get('/api/plans/' + id);
+          currentPlan.value = r.data;
+          setTab('plan');
+        } catch (e) { console.error(e); }
+      }
+      async function refreshPlan() {
+        if (!currentPlanId.value) return;
+        const r = await axios.get('/api/plans/' + currentPlanId.value);
+        currentPlan.value = r.data;
+      }
+
+      const audio = ref({ generating: false, error: '' });
+      async function generateAudio() {
+        if (!currentPlan.value) return;
+        audio.value.generating = true;
+        audio.value.error = '';
+        try {
+          await axios.post('/api/media/audio', {
+            audience: currentPlan.value.plan.audience,
+            text: currentPlan.value.plan.summary_markdown,
+            title: 'Plan narration',
+            plan_id: currentPlan.value.plan.id,
+            student_id: currentPlan.value.plan.student_id,
+          });
+          await refreshPlan();
+        } catch (e) {
+          audio.value.error = (e?.response?.data?.detail || e?.message || String(e));
+        } finally {
+          audio.value.generating = false;
+        }
+      }
+
+      const image = ref({ generating: false, error: '' });
+      async function generateImage() {
+        if (!currentPlan.value) return;
+        image.value.generating = true;
+        image.value.error = '';
+        try {
+          const subj = currentPlan.value.sections[0]?.subject_code || null;
+          const grade = currentPlan.value.sections[0]?.target_grade || null;
+          await axios.post('/api/media/images', {
+            subject_code: subj,
+            grade_level: grade,
+            audience: currentPlan.value.plan.audience,
+            title: 'Course-pack cover',
+            scene: 'a cover image evoking the subject and audience of a personalised learning plan',
+            extras: 'use the prairie palette',
+            plan_id: currentPlan.value.plan.id,
+            student_id: currentPlan.value.plan.student_id,
+          });
+          await refreshPlan();
+        } catch (e) {
+          image.value.error = (e?.response?.data?.detail || e?.message || String(e));
+        } finally {
+          image.value.generating = false;
+        }
+      }
+
+      const chat = ref({ messages: [], draft: '', sending: false });
+      async function sendChat() {
+        if (!chat.value.draft || chat.value.sending) return;
+        const msg = chat.value.draft;
+        chat.value.draft = '';
+        chat.value.messages.push({ role: 'user', text: msg });
+        chat.value.sending = true;
+        try {
+          const r = await axios.post('/api/ai/chat', {
+            student_id: currentPlan.value?.plan?.student_id || currentStudentId.value,
+            plan_id: currentPlan.value?.plan?.id,
+            message: msg,
+            audience: role.value,
+          });
+          chat.value.messages.push({ role: 'assistant', text: r.data.reply });
+        } catch (e) {
+          chat.value.messages.push({ role: 'assistant', text: '(error: ' + (e?.response?.data?.detail || e?.message || String(e)) + ')' });
+        } finally {
+          chat.value.sending = false;
+        }
+      }
+
+      const cost = ref({ plans_per_day: 1, audio_per_plan: 1, images_per_plan: 1, chats_per_day: 4, days_per_month: 20 });
+      const UNIT = { plan: 0.026, audio: 0.27, image: 0.04, chat: 0.015 };
+      function costRow(days) {
+        const i = cost.value;
+        const plans = i.plans_per_day * days;
+        const audio = i.plans_per_day * i.audio_per_plan * days;
+        const images = i.plans_per_day * i.images_per_plan * days;
+        const chats = i.chats_per_day * days;
+        const total = plans * UNIT.plan + audio * UNIT.audio + images * UNIT.image + chats * UNIT.chat;
+        return { plans, audio, images, chats, total };
+      }
+
+      function back() {
+        if (tab.value === 'plan') setTab(currentStudentId.value ? 'student' : 'roster');
+        else if (tab.value === 'student') setTab('roster');
+      }
+
+      function shortDate(s) { try { return new Date(s).toLocaleString(); } catch { return s; } }
+      function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+      function subjectName(code) { return SUBJECT_NAMES[code] || code; }
+
+      onMounted(async () => {
+        try { health.value = (await axios.get('/api/health')).data; } catch { health.value = { status: 'unreachable' }; }
+        await loadRoster();
+        const h = (location.hash || '').replace(/^#/, '').split('/');
+        if (h[0] === 'help' || h[0] === 'costs') setTab(h[0]);
+        else if (h[0] === 'student' && h[1]) await openStudent(Number(h[1]));
+        else if (h[0] === 'plan' && h[1]) await openPlan(Number(h[1]));
+      });
+
+      return {
+        role, roles, setRole,
+        tab, tabs, setTab,
+        health,
+        filters, roster, rosterTotal, rosterLoading, loadRoster, grades: GRADES,
+        student, currentStudentId, openStudent,
+        plan, toggleSubject, generatePlan, allSubjects: ALL_SUBJECTS,
+        currentPlanId, currentPlan, openPlan, planMedia,
+        audio, generateAudio, image, generateImage,
+        chat, sendChat,
+        cost, costRow,
+        back, shortDate, capitalize, subjectName,
+      };
+    },
+  }).mount('#app');
+</script>
+</body>
 </html>

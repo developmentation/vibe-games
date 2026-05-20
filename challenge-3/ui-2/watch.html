@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Watch — Alberta Learning, Personalized</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet" />
+    <style>
+      html, body { height: 100%; }
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background-color: #0c1023;
+        color: #e8eaf3;
+        background-image: radial-gradient(circle at 50% 14%, rgba(255,255,255,0.06), rgba(12,16,35,0.65) 48%, rgba(8,11,24,0.98) 100%);
+        background-attachment: fixed;
+      }
+      .serif { font-family: 'Playfair Display', Georgia, serif; }
+      [v-cloak] { display: none; }
+      .stage {
+        aspect-ratio: 16/9;
+        background-color: #050816;
+        border-radius: 18px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 30px 80px -30px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05);
+      }
+      .stage-img {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: cover;
+        transition: opacity 600ms ease, transform 8000ms ease-out;
+        opacity: 0;
+        transform: scale(1.04);
+      }
+      .stage-img.is-active {
+        opacity: 1;
+        transform: scale(1.0);
+      }
+      .stage-placeholder {
+        position: absolute; inset: 0;
+        background-image: radial-gradient(circle at 30% 30%, rgba(255,210,140,0.15), transparent 60%),
+                          radial-gradient(circle at 70% 70%, rgba(120,180,255,0.12), transparent 60%);
+        display: flex; align-items: center; justify-content: center;
+        color: rgba(255,255,255,0.55);
+        font-size: 0.85rem;
+        padding: 2rem;
+        text-align: center;
+      }
+      .stage-overlay {
+        position: absolute; inset: auto 0 0 0;
+        padding: 1.25rem 1.5rem 1.5rem;
+        background: linear-gradient(to top, rgba(5,8,22,0.95), rgba(5,8,22,0.5) 60%, transparent);
+        color: white;
+      }
+      .stage-overlay .caption {
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255,210,140,0.9);
+      }
+      .stage-overlay .title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(1.5rem, 2.2vw, 2.4rem);
+        line-height: 1.1;
+        margin-top: 0.35rem;
+      }
+      .stage-overlay .narration {
+        font-size: clamp(0.85rem, 1.1vw, 1rem);
+        line-height: 1.5;
+        margin-top: 0.6rem;
+        max-width: 60ch;
+        color: rgba(255,255,255,0.88);
+      }
+      .progress-track {
+        height: 4px;
+        background: rgba(255,255,255,0.12);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ffd28c, #ff7e3e);
+        width: 0%;
+        transition: width 200ms linear;
+      }
+      .scene-pill {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 1.8rem; height: 1.8rem;
+        border-radius: 999px;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-style: italic;
+        font-size: 0.85rem;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.04);
+        color: rgba(255,255,255,0.75);
+        transition: all 150ms ease;
+      }
+      .scene-pill.active {
+        background: #ff7e3e;
+        border-color: #ff7e3e;
+        color: white;
+      }
+      .scene-pill.done {
+        background: rgba(255,210,140,0.18);
+        border-color: rgba(255,210,140,0.4);
+        color: #ffd28c;
+      }
+      .scene-pill.has-media::after {
+        content: '';
+        width: 4px; height: 4px;
+        background: #6ee7b7;
+        border-radius: 50%;
+        margin-left: 0.25rem;
+      }
+      .ctrl-btn {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.04);
+        color: rgba(255,255,255,0.85);
+        transition: all 150ms ease;
+      }
+      .ctrl-btn:hover:not(:disabled) {
+        background: rgba(255,255,255,0.10);
+        border-color: rgba(255,255,255,0.25);
+      }
+      .ctrl-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .ctrl-play {
+        background: #ff7e3e;
+        border-color: #ff7e3e;
+        color: white;
+      }
+      .ctrl-play:hover:not(:disabled) {
+        background: #ff6920;
+        border-color: #ff6920;
+      }
+      .badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.7);
+      }
+      .closing {
+        background: linear-gradient(135deg, #ff7e3e 0%, #ffd28c 100%);
+        color: #2a1208;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak class="min-h-screen flex flex-col">
+      <header class="border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div>
+            <div class="text-[0.65rem] uppercase tracking-[0.2em] text-white/50">Vibe Games &middot; Challenge 3</div>
+            <h1 class="serif text-2xl text-white mt-0.5">{{ script?.meta?.title || 'Alberta Learning, Personalized' }}</h1>
+            <p class="text-xs text-white/55 mt-0.5">{{ script?.meta?.subtitle || 'A short narrated story.' }}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="badge" v-if="manifestSource">{{ manifestSource }}</span>
+            <a href="/ui-2/" class="text-xs text-white/60 hover:text-white underline">Back to console</a>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <div class="max-w-6xl mx-auto px-6 py-6 grid lg:grid-cols-[1fr_280px] gap-6">
+
+          <!-- Stage + controls -->
+          <section>
+            <div class="stage">
+              <div v-if="!current" class="stage-placeholder">Loading...</div>
+              <template v-else>
+                <template v-for="(s, i) in scenes" :key="'img-' + s.scene_order">
+                  <img
+                    v-if="resolvedImageUrl(s)"
+                    :src="resolvedImageUrl(s)"
+                    :alt="s.alt_text || s.title"
+                    class="stage-img"
+                    :class="{ 'is-active': i === index }"
+                    draggable="false"
+                  />
+                </template>
+                <div v-if="!resolvedImageUrl(current)" class="stage-placeholder">
+                  <div>
+                    <div class="text-white/60 text-xs uppercase tracking-widest mb-2">No image yet</div>
+                    <div class="text-white/80 text-sm">Run <code class="bg-white/10 px-1 rounded">node challenge-3/scripts/generate-commercial.mjs</code> to render the visuals.</div>
+                  </div>
+                </div>
+                <div class="stage-overlay">
+                  <div class="caption">Scene {{ current.scene_order }} / {{ scenes.length }} &middot; {{ current.caption }}</div>
+                  <div class="title">{{ current.title }}</div>
+                  <div class="narration">{{ current.narration }}</div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Closing slide -->
+            <div v-if="atClosingSlide" class="closing rounded-2xl px-6 py-8 sm:px-10 sm:py-12 mt-6 shadow-lg">
+              <div class="text-[0.7rem] uppercase tracking-[0.2em] mb-3">The challenge</div>
+              <p class="serif text-2xl sm:text-3xl lg:text-4xl leading-snug">{{ script.meta.tagline }}</p>
+              <div class="mt-6 flex flex-wrap items-center gap-3 text-sm">
+                <a href="/ui-2/" class="ctrl-btn" style="color:#2a1208;border-color:#2a1208;background:transparent;">Open the platform</a>
+                <a href="https://github.com/" class="ctrl-btn" style="color:#2a1208;border-color:#2a1208;background:transparent;">Read the prompt</a>
+              </div>
+            </div>
+
+            <!-- Player controls -->
+            <div class="mt-4 flex items-center gap-2 flex-wrap">
+              <button class="ctrl-btn" @click="prev" :disabled="index === 0">&larr; Prev</button>
+              <button class="ctrl-btn ctrl-play" @click="togglePlay" :disabled="!current">
+                <span v-if="playing">&#10074;&#10074; Pause</span>
+                <span v-else>&#9654; Play</span>
+              </button>
+              <button class="ctrl-btn" @click="next" :disabled="index >= scenes.length - 1">Next &rarr;</button>
+              <button class="ctrl-btn" @click="restart" title="Restart">&#8634;</button>
+              <div class="flex items-center gap-2 flex-1 min-w-[140px]">
+                <span class="font-mono text-[0.7rem] text-white/60 tabular-nums shrink-0">{{ fmt(currentTime) }} / {{ fmt(duration) }}</span>
+                <div class="progress-track flex-1">
+                  <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+                </div>
+              </div>
+              <label class="text-[0.65rem] uppercase tracking-wider text-white/60 flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" v-model="autoAdvance" class="accent-orange-400" />
+                auto-advance
+              </label>
+            </div>
+
+            <!-- Error / status -->
+            <div v-if="error" class="mt-3 text-rose-300 text-sm bg-rose-500/10 border border-rose-500/30 rounded-md px-3 py-2">
+              {{ error }}
+            </div>
+            <div v-else-if="missingAudio" class="mt-3 text-amber-300/90 text-sm bg-amber-400/10 border border-amber-400/30 rounded-md px-3 py-2">
+              No narration audio yet for this scene. Run <code class="bg-white/10 px-1 rounded">node challenge-3/scripts/generate-commercial.mjs</code> to render the voiceovers.
+            </div>
+          </section>
+
+          <!-- Scene rail -->
+          <aside>
+            <div class="text-xs uppercase tracking-widest text-white/50 mb-3">Scenes</div>
+            <div class="space-y-2">
+              <button
+                v-for="(s, i) in scenes" :key="s.scene_order"
+                @click="goTo(i)"
+                class="w-full text-left rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition px-3 py-2.5 flex items-center gap-3"
+                :class="{ 'border-orange-400/60 bg-orange-400/10': i === index }"
+              >
+                <span class="scene-pill" :class="{ active: i === index, done: i < index, 'has-media': !!resolvedImageUrl(s) }">{{ String(s.scene_order).padStart(2, '0') }}</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[0.65rem] uppercase tracking-wider text-white/50">{{ s.caption }}</span>
+                  <span class="block text-sm text-white/90 truncate">{{ s.title }}</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="mt-5 text-[0.7rem] uppercase tracking-widest text-white/40">Run</div>
+            <div class="mt-2 text-xs text-white/65 leading-snug">
+              <p v-if="manifestSource === 'static-manifest'">Loaded the generated commercial manifest <code class="bg-white/10 px-1 rounded">commercial.json</code>.</p>
+              <p v-else-if="manifestSource === 'db-join'">Loaded scene assets live from <code class="bg-white/10 px-1 rounded">/api/media?run_label=commercial-v1</code>.</p>
+              <p v-else>Showing the narration script only. Generate assets to light up the visuals and voice.</p>
+              <pre class="mt-2 bg-white/5 border border-white/10 rounded p-2 font-mono text-[0.65rem] leading-snug overflow-x-auto">node challenge-3/scripts/generate-commercial.mjs</pre>
+            </div>
+          </aside>
+        </div>
+      </main>
+
+      <footer class="border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-6 py-4 text-[0.7rem] text-white/45 flex items-center justify-between">
+          <span>Vibe Games hackathon &middot; Challenge 3 &middot; Watch presentation</span>
+          <span>OpenAI gpt-image-1 &middot; ElevenLabs Flash v2.5</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const { createApp, ref, computed, onMounted, onBeforeUnmount, watch } = Vue;
+
+      createApp({
+        setup() {
+          const script = ref(null);
+          const manifest = ref(null);
+          const dbAssets = ref({});
+          const manifestSource = ref(null);
+          const index = ref(0);
+          const playing = ref(false);
+          const autoAdvance = ref(true);
+          const currentTime = ref(0);
+          const duration = ref(0);
+          const error = ref(null);
+
+          let audio = null;
+
+          const scenes = computed(() => script.value?.scenes || []);
+          const current = computed(() => scenes.value[index.value] || null);
+
+          function resolveSceneAssets(scene) {
+            if (!scene) return { image: null, audio: null };
+            if (manifest.value) {
+              const m = manifest.value.scenes.find((s) => s.scene_order === scene.scene_order);
+              if (m) return { image: m.image, audio: m.audio };
+            }
+            const dbEntry = dbAssets.value[scene.scene_order];
+            return dbEntry || { image: null, audio: null };
+          }
+
+          function resolvedImageUrl(scene) {
+            const a = resolveSceneAssets(scene);
+            return a.image?.bytes_url || null;
+          }
+          function resolvedAudioUrl(scene) {
+            const a = resolveSceneAssets(scene);
+            return a.audio?.bytes_url || null;
+          }
+
+          const missingAudio = computed(() => current.value && !resolvedAudioUrl(current.value));
+          const atClosingSlide = computed(() => current.value && current.value.scene_order === scenes.value.length);
+          const progressPercent = computed(() => {
+            if (!duration.value) return 0;
+            return Math.min(100, (currentTime.value / duration.value) * 100);
+          });
+
+          function fmt(s) {
+            if (!isFinite(s) || s < 0) return '0:00';
+            const m = Math.floor(s / 60);
+            const r = Math.floor(s % 60);
+            return `${m}:${r < 10 ? '0' : ''}${r}`;
+          }
+
+          function loadSceneAudio(autoplay) {
+            if (!audio || !current.value) return;
+            const src = resolvedAudioUrl(current.value);
+            error.value = null;
+            currentTime.value = 0;
+            duration.value = 0;
+            if (!src) {
+              audio.pause();
+              audio.removeAttribute('src');
+              if (autoplay && autoAdvance.value && index.value < scenes.value.length - 1) {
+                setTimeout(() => { index.value += 1; }, 4000);
+              }
+              return;
+            }
+            audio.src = src;
+            if (autoplay) {
+              const p = audio.play();
+              if (p && p.then) {
+                p.then(() => { playing.value = true; }).catch(() => { playing.value = false; });
+              }
+            }
+          }
+
+          function play() {
+            if (!audio) return;
+            if (!audio.src && current.value) {
+              const src = resolvedAudioUrl(current.value);
+              if (src) audio.src = src;
+            }
+            if (!audio.src) return;
+            const p = audio.play();
+            if (p && p.then) p.then(() => { playing.value = true; }).catch(() => { playing.value = false; });
+          }
+          function pause() {
+            if (audio) audio.pause();
+            playing.value = false;
+          }
+          function togglePlay() { playing.value ? pause() : play(); }
+          function next() {
+            if (index.value < scenes.value.length - 1) {
+              index.value += 1;
+            }
+          }
+          function prev() {
+            if (index.value > 0) index.value -= 1;
+          }
+          function goTo(i) {
+            if (i < 0 || i >= scenes.value.length) return;
+            index.value = i;
+          }
+          function restart() {
+            index.value = 0;
+          }
+
+          watch(index, () => {
+            const wasPlaying = playing.value || autoAdvance.value;
+            setTimeout(() => loadSceneAudio(wasPlaying), 60);
+          });
+
+          async function loadScript() {
+            const res = await fetch('./commercial.script.json');
+            if (!res.ok) throw new Error(`commercial.script.json: HTTP ${res.status}`);
+            script.value = await res.json();
+          }
+          async function tryLoadManifest() {
+            try {
+              const res = await fetch('./commercial.json', { cache: 'no-store' });
+              if (!res.ok) return false;
+              manifest.value = await res.json();
+              manifestSource.value = 'static-manifest';
+              return true;
+            } catch { return false; }
+          }
+          async function tryJoinDbAssets() {
+            try {
+              const runLabel = script.value?.meta?.run_label || 'commercial-v1';
+              const url = `/api/media?limit=200`;
+              const res = await fetch(url);
+              if (!res.ok) return false;
+              const data = await res.json();
+              const items = (data.items || []).filter((it) => true);
+              const lookup = {};
+              for (const it of items) {
+                let meta;
+                try {
+                  meta = await fetch(`/api/media/${it.id}`).then((r) => r.ok ? r.json() : null);
+                } catch { meta = null; }
+                if (!meta || !meta.metadata) continue;
+                if (meta.metadata.run_label !== runLabel) continue;
+                const order = meta.metadata.scene_order;
+                if (order == null) continue;
+                const slot = lookup[order] || (lookup[order] = { image: null, audio: null });
+                if (it.kind === 'image' && (!slot.image || it.id > slot.image.id)) {
+                  slot.image = { id: it.id, bytes_url: `/api/media/${it.id}/bytes` };
+                }
+                if (it.kind === 'audio' && (!slot.audio || it.id > slot.audio.id)) {
+                  slot.audio = { id: it.id, bytes_url: `/api/media/${it.id}/bytes`, duration_seconds: it.duration_seconds };
+                }
+              }
+              const matched = Object.keys(lookup).length;
+              if (matched > 0) {
+                dbAssets.value = lookup;
+                manifestSource.value = 'db-join';
+                return true;
+              }
+            } catch { /* ignore */ }
+            return false;
+          }
+
+          onMounted(async () => {
+            try {
+              await loadScript();
+            } catch (e) {
+              error.value = `Could not load script: ${e.message}`;
+              return;
+            }
+            audio = new Audio();
+            audio.preload = 'auto';
+            audio.addEventListener('timeupdate', () => { currentTime.value = audio.currentTime || 0; });
+            audio.addEventListener('loadedmetadata', () => { duration.value = audio.duration || 0; });
+            audio.addEventListener('ended', () => {
+              if (autoAdvance.value && index.value < scenes.value.length - 1) {
+                index.value += 1;
+              } else {
+                playing.value = false;
+              }
+            });
+            audio.addEventListener('error', () => {
+              error.value = 'Audio failed to load for this scene.';
+              playing.value = false;
+            });
+
+            const haveStatic = await tryLoadManifest();
+            if (!haveStatic) await tryJoinDbAssets();
+
+            setTimeout(() => loadSceneAudio(false), 100);
+          });
+
+          onBeforeUnmount(() => {
+            if (audio) { audio.pause(); audio.src = ''; }
+          });
+
+          return {
+            script, manifest, manifestSource, index, scenes, current,
+            playing, autoAdvance, currentTime, duration, error,
+            missingAudio, atClosingSlide, progressPercent,
+            resolvedImageUrl, fmt,
+            play, pause, togglePlay, next, prev, goTo, restart,
+          };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

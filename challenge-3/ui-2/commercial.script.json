@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "title": "Alberta Learning, Personalized",
+    "subtitle": "What can be built in 40 minutes",
+    "run_label": "commercial-v1",
+    "voice_model": "eleven_flash_v2_5",
+    "image_size": "1024x1024",
+    "image_quality": "medium",
+    "tagline": "Alberta can build this platform in 40 minutes. What is stopping you from transforming education for every parent, teacher, and student?"
+  },
+  "scenes": [
+    {
+      "scene_order": 1,
+      "id": "opening-classroom",
+      "title": "Every student is different.",
+      "caption": "Opening",
+      "narration": "Walk into any Alberta classroom. There are thirty stories in the room. Some are flying. Some are barely hanging on. The same lesson lands on all of them at the same time. That has been the shape of school for a long time. It does not have to stay that way.",
+      "image_prompt_hint": "wide shot of a diverse Alberta K-12 classroom with thirty students at their desks, sunlight from large windows, warm prairie palette, editorial illustration style, no text, no logos",
+      "alt_text": "A bright Alberta classroom with a diverse mix of students at their desks."
+    },
+    {
+      "scene_order": 2,
+      "id": "the-gap",
+      "title": "The gap is real.",
+      "caption": "The problem",
+      "narration": "One student needs a step back to fractions. Another is ready to leap a grade ahead. A teacher with thirty kids cannot build thirty plans by Friday. Parents want to help and do not always know how. The gap between students and the support that fits them is the quiet crisis of every school year.",
+      "image_prompt_hint": "a single student looking thoughtful at a desk while other students work in groups around them, soft lighting, gentle warm palette, editorial illustration, no text",
+      "alt_text": "A student pauses at a desk while classmates work in small groups nearby."
+    },
+    {
+      "scene_order": 3,
+      "id": "the-idea",
+      "title": "What if every student had a plan?",
+      "caption": "The idea",
+      "narration": "What if every student walked into class with a plan made for them? Built from the real Alberta curriculum. Grounded in their actual marks. Shaped by their strengths and the supports they need. Not a stack of worksheets. A short, honest plan a teacher, parent, and student can all read in five minutes.",
+      "image_prompt_hint": "a teacher and a student sitting side by side reviewing a friendly one-page learning plan at a table, warm prairie palette, editorial illustration, no text, no logos",
+      "alt_text": "A teacher and student looking at a one-page learning plan together."
+    },
+    {
+      "scene_order": 4,
+      "id": "the-build",
+      "title": "We connected three things.",
+      "caption": "How it works",
+      "narration": "We took three pieces Alberta already has. The Learn Alberta curriculum. A student record with three years of marks and teacher notes. And modern AI that can read both. The platform picks the right outcomes for that student at that grade and writes a plan that points at real curriculum codes, not invented ones.",
+      "image_prompt_hint": "three connected illustrated panels left to right: a curriculum book, a student gradebook on a tablet, a friendly AI assistant icon, joined by soft connecting lines, warm prairie palette, editorial illustration, no text labels",
+      "alt_text": "Three illustrated panels showing the curriculum, a gradebook, and an AI assistant connected together."
+    },
+    {
+      "scene_order": 5,
+      "id": "three-audiences",
+      "title": "Teacher. Parent. Student.",
+      "caption": "Three views",
+      "narration": "The same plan speaks three ways. To a teacher it is clinical and specific, with formative checks. To a parent it is warm and practical, with one thing to try at home. To a student it is direct and short, with a calm voice that says, you can do this. One plan. Three doors in.",
+      "image_prompt_hint": "a three-panel split illustration showing a teacher with a clipboard, a parent reading on a couch with a child, and a student wearing headphones looking at a tablet, warm prairie palette, editorial illustration, no text",
+      "alt_text": "Three panels: a teacher, a parent and child reading, and a student listening on headphones."
+    },
+    {
+      "scene_order": 6,
+      "id": "voice-and-image",
+      "title": "Made personal in minutes.",
+      "caption": "What you just heard",
+      "narration": "The voice you are hearing right now was generated for this commercial. The pictures on screen were generated for this commercial. The same tools, pointed at a real classroom, can produce a narrated lesson and a friendly cover image for any student in Alberta. In minutes. Not in months.",
+      "image_prompt_hint": "an illustration of a small home studio with a microphone and a tablet showing a friendly illustrated character, soft warm light, editorial style, no text, no logos",
+      "alt_text": "A small home studio with a microphone and a tablet showing an illustrated character."
+    },
+    {
+      "scene_order": 7,
+      "id": "the-cta",
+      "title": "Forty minutes. One team.",
+      "caption": "The challenge",
+      "narration": "We built the first working version of this platform in forty minutes. One small team. Off-the-shelf tools. Alberta data. If a forty-minute build can do this, what is stopping you from transforming education for every parent, every teacher, and every student? Your move.",
+      "image_prompt_hint": "a small dev team of three diverse people at a long desk in a sunny office, laptops open, papers, sticky notes, calm and focused, warm prairie palette, editorial illustration, no text, no logos",
+      "alt_text": "Three teammates at a long desk, laptops open, working calmly together."
+    }
+  ]
+}

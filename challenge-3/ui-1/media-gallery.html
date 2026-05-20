@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sample classroom content | Vibe Games Challenge 3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+      html, body { height: 100%; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; }
+      [v-cloak] { display: none; }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div id="app" v-cloak class="min-h-screen flex flex-col">
+      <header class="bg-white border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vibe Games &middot; Challenge 3</div>
+            <h1 class="text-xl font-bold">Sample classroom content</h1>
+            <p class="text-sm text-slate-500 mt-1">Generated images and narrated prose for Alberta K-12. Served from <code>/api/media</code>.</p>
+          </div>
+          <a href="/ui-1/" class="text-sm text-slate-500 hover:text-slate-900 underline">Back to ui-1</a>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <div class="max-w-6xl mx-auto px-6 py-6">
+          <div class="bg-white border border-slate-200 rounded-xl p-4 mb-4 flex flex-wrap items-end gap-3">
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Kind</label>
+              <select v-model="kind" @change="load" class="border border-slate-200 rounded-md px-2 py-1 text-sm w-32">
+                <option value="">All</option>
+                <option value="image">Images</option>
+                <option value="audio">Audio</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Subject</label>
+              <input v-model="subject" @change="load" type="text" placeholder="MAT, ELA, SCI..." class="border border-slate-200 rounded-md px-2 py-1 text-sm w-40" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Grade</label>
+              <input v-model="grade" @change="load" type="text" placeholder="K, 1..12" class="border border-slate-200 rounded-md px-2 py-1 text-sm w-24" />
+            </div>
+            <button @click="load" class="px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm">Refresh</button>
+            <div class="ml-auto text-xs text-slate-500">{{ items.length }} asset{{ items.length === 1 ? '' : 's' }}</div>
+          </div>
+
+          <div v-if="error" class="rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-sm p-3 mb-4">{{ error }}</div>
+          <div v-if="!items.length && !error" class="text-sm text-slate-500 bg-white border border-dashed border-slate-200 rounded-xl p-6 text-center">
+            No assets yet. Run one of these to populate:
+            <div class="mt-2 font-mono text-xs text-slate-700 space-y-1">
+              <div>node challenge-3/server-1/tests/test-image-concurrency.mjs --total 20 --concurrency 12</div>
+              <div>node challenge-3/server-1/tests/test-audio-concurrency.mjs --total 20 --concurrency 10</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div v-for="m in items" :key="m.id" class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+              <div v-if="m.kind === 'image'" class="aspect-square bg-slate-50 flex items-center justify-center overflow-hidden">
+                <img :src="m.bytes_url" :alt="m.title" loading="lazy" class="w-full h-full object-cover" />
+              </div>
+              <div v-else class="p-4 bg-slate-50">
+                <audio :src="m.bytes_url" controls preload="none" class="w-full"></audio>
+              </div>
+              <div class="p-3">
+                <div class="text-xs font-mono text-slate-400 flex justify-between">
+                  <span>#{{ m.id }} &middot; {{ m.kind }}</span>
+                  <span>{{ m.subject_code || '-' }} {{ m.grade_level || '' }}</span>
+                </div>
+                <div class="text-sm font-medium mt-1 line-clamp-2">{{ m.title }}</div>
+                <div class="text-xs text-slate-500 mt-1">
+                  <span v-if="m.audience">{{ m.audience }}</span>
+                  <span v-if="m.duration_seconds"> &middot; {{ m.duration_seconds }}s</span>
+                  <span v-if="m.byte_size"> &middot; {{ Math.round(m.byte_size / 1024) }} KB</span>
+                  <span v-if="m.model"> &middot; {{ m.model }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-6xl mx-auto px-6 py-3 text-xs text-slate-500">
+          Vibe Games Challenge 3 &middot; OpenAI image generation &middot; ElevenLabs Flash v2.5 narration
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+      createApp({
+        setup() {
+          const items = ref([]);
+          const kind = ref('');
+          const subject = ref('');
+          const grade = ref('');
+          const error = ref('');
+          const load = async () => {
+            error.value = '';
+            try {
+              const params = new URLSearchParams();
+              if (kind.value) params.set('kind', kind.value);
+              if (subject.value) params.set('subject', subject.value.toUpperCase());
+              if (grade.value) params.set('grade', grade.value);
+              params.set('limit', '60');
+              const resp = await axios.get('/api/media?' + params.toString());
+              items.value = resp.data.items || [];
+            } catch (e) {
+              error.value = 'Could not load /api/media: ' + (e?.response?.data?.detail || e.message);
+            }
+          };
+          onMounted(load);
+          return { items, kind, subject, grade, error, load };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>
