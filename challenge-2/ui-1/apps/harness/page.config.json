@@ -1,0 +1,29 @@
+{
+  "title": "Alberta.ca harness — how it works",
+  "meta_description": "How the Alberta.ca harness scaffolds Drupal-deployable prototypes — the 5 skills, the build pipeline, the 34 evaluator checks, and the GoA component conventions.",
+  "lede": "How the harness turns a one-sentence brief into a Drupal-deployable prototype, and the checks that gate sign-off.",
+  "html_id": "harness",
+  "html_class": "js",
+  "body_class": "page-harness path-node",
+  "breadcrumbs": [
+    {
+      "label": "Home",
+      "href": "https://www.alberta.ca/"
+    },
+    {
+      "label": "Technology and innovation",
+      "href": "https://www.alberta.ca/technology-and-innovation"
+    },
+    {
+      "label": "Alberta.ca harness"
+    }
+  ],
+  "parent": {
+    "label": "Technology and innovation",
+    "href": "https://www.alberta.ca/technology-and-innovation"
+  },
+  "hero": {
+    "image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80",
+    "position": "center center"
+  }
+}

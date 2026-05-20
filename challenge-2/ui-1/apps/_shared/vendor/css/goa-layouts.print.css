@@ -1,0 +1,246 @@
+/* hidden ***/
+
+div.goa-searchbar,
+div.goa-menubar,
+div.goa-togglesearch,
+div.goa-skiplinks,
+div#goa-quicklinks,
+div#goa-aboutlinks,
+div.goa-breadcrumbs > ul > li.current,
+div.goa-togglemenu,
+div.goa-togglesectionmenu, 
+div.goa-menubar--collection,
+div.goa-guidetools,
+div.goa-guidenav,
+div.goa-toggleguidemenu,
+div.goa-languages-wrapper,
+div.goa-hero--branded > .goa-hero--branded-logo,
+div.goa-breadcrumbs > .goa-togglelanguages,
+.goa-search-container,
+.goa-togglebuttons,
+.goa-notifications-toggle,
+.goa-nav,
+.goa-logo > a > span,
+.goa-previous-page,
+.goa-breadcrumbs > ul > li.toggle-item,
+.goa-video,
+.goa-back-to-top,
+.goa-flyin,
+footer .goa-logo,
+footer .goa-footer--social,
+.goa-mask,
+#goa-button--notifications-close,
+.goa-sidebar-collapse-button,
+.goa-section--heading-mobile,
+.goa-previous-next,
+.goa-taxonomy > .goa-taxonomy--track {
+	display: none;
+}
+
+.goa-logo-container > .goa-logo > a {
+    -webkit-print-color-adjust: exact;
+    -moz-print-color-adjust: exact;
+    -ms-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* general ***/
+
+body {
+    margin: 0px;
+    background: #fff;
+    font-family: acumin-pro-semi-condensed, sans-serif;
+    font-weight: 400;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+
+/* goa-header ***/
+
+div.goa-header {
+	margin: 28px 0 0;
+}
+
+/* goa-notifications ***/
+
+div.goa-notifications ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-notifications li {
+	padding: 24px;
+	border: 1px solid #000;
+}
+div.goa-notifications li + li {
+	margin: 28px 0 0;
+}
+
+/* goa-breadcrumbs ***/
+
+div.goa-breadcrumbs {
+	margin: 28px 0 0;
+    border-bottom: 1px solid #DCDCDC;
+    padding-bottom: 2rem;
+}
+div.goa-breadcrumbs ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-breadcrumbs li {
+	display: inline;
+}
+div.goa-breadcrumbs li:not(:nth-last-child(2)):after {
+	display: inline;
+	margin: auto 12px;
+	content: '\203A';
+}
+
+/* goa-jumplinks***/
+
+.goa-jumplinks > .goa-column-100 > ul {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    vertical-align: top;
+    margin: 12px 0 0;
+    column-gap: 28px;
+}
+
+.goa-jumplinks ul > li {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 8px 24px 0 0;
+    width: 100%;
+    padding: 0 0 0 24px;
+    position: relative;
+    vertical-align: top;
+}
+
+.goa-jumplinks > .goa-column-100 > ul > li:before {
+    content: '';
+    position: relative;
+    left: -1.5rem;
+	top: 15px;
+    bottom: 0.625rem;
+    display: block;
+    height: 1px;
+    width: 0.75rem;
+	border-bottom: 1px solid #919191;
+}
+
+/* goa-sidebar **/
+
+.goa-sidebar-content {
+    margin: 2rem 0 0;
+    padding: 2rem 0 0;
+    border-top: 1px solid #919191;
+}
+
+/* goa-copyright ***/
+
+div.goa-copyright {
+	margin: 56px 0 0;
+}
+
+
+/* goa-languages ***/
+
+div.goa-languages {
+	margin: 28px 0 0;
+}
+div.goa-languages ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-languages li {
+	display: inline;
+}
+div.goa-languages li + li {
+	margin-left: 12px;
+}
+div.goa-languages li.current-lang {
+	font-weight: 700;
+}
+
+/* goa-menugrid ***/
+
+div.goa-themes {
+	display: inline-block;
+}
+ul.goa-menugrid {
+
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+ul.goa-menugrid > li {
+	float: left;
+	width: 50%;
+}
+
+/* goa-premier ***/
+
+div.goa-premier {
+	margin: 28px 0 0;
+}
+div.goa-premier img {
+	width: 33%;
+}
+
+/* goa-guide ***/
+div.goa-guidemeta ul, div.goa-guidepages ul, div.goa-guideupdates ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+} 
+div.goa-guidepages ul {
+	float: right;
+}
+div.goa-guidepages li { 
+	display: inline;
+}
+div.goa-guidepages li:not(:last-child):after {
+	display: inline;
+	margin: auto 10px;
+	content: '\007C';
+}
+div.goa-guidetoc li button {
+	outline: none;
+	border: 0;
+	padding: 0;
+}
+ol.goa-guidelist li, 
+ul.goa-guidelist li { 
+	display: block;
+	position: relative;
+}
+ol.goa-guidelist, ul.goa-guidelist { 
+	display: block;
+	list-style-type: none;
+	padding: 0;
+	margin: 28px 0 0;
+}
+ol.goa-guidelist {
+	counter-reset: guide-counter;
+}
+ol.goa-guidelist ol { 
+	counter-reset: guide-counter;
+}
+ol.goa-guidelist li a:before, 
+ol.goa-guidelist li button:before {
+	counter-increment: guide-counter;
+	content: counters(guide-counter,".") " ";
+	float: left;
+	margin-right: 10px;
+}
+
+/* goa-pagemenu */
+
+div.goa-hero--branded {
+	display: none !important; /* if necessary */
+}
+

@@ -1,0 +1,30 @@
+/* apps/_shared/css/overrides.css
+ *
+ * Cross-cutting tweak applied to every prototype. Loaded AFTER the 6 vendored
+ * GoA stylesheets but BEFORE the per-page styles.css.
+ *
+ * Keep this file as small as possible. Two prior overrides were removed once
+ * we found the GoA-canonical pattern:
+ *   - `.goa-table` max-height: handled per-page where short documentation
+ *     tables don't want the 50rem scroll cap (see hobbyist/commercial/rules
+ *     pages' styles.css). The GoA cap is correct for tall data tables.
+ *   - `a.goa-button` color: removed once we switched primary anchor-buttons
+ *     to `<a class="goa-cta">`, which is GoA's intended pattern for anchor
+ *     CTAs. `a.goa-cta` has 0,1,1 specificity that ties `a:link` and wins by
+ *     source order. Use `<button class="goa-button">` for buttons, and
+ *     `<a class="goa-cta">` for anchor CTAs. Secondary variant
+ *     `<a class="goa-button goa--secondary">` is fine because its color
+ *     (#006dcc) matches the inherited `a:link` color.
+ *
+ * NEVER edit the vendored CSS under apps/_shared/vendor/css/. Patches go here.
+ */
+
+/* .goa-main-content is hard-coded to width: 67.188% (designed for the
+   with-sidebar layout). On pages without a sidebar, the right 33% is wasted
+   and the content column ends up narrower than necessary. When there is no
+   .goa-sidebar-content sibling, let the main-content take the full row.
+   GoA selector is element + class so a class-only selector loses; matching
+   their specificity by attaching :not() to .goa-container. */
+.goa-container:not(:has(.goa-sidebar-content)) .goa-main-content {
+  width: 100%;
+}

@@ -1,0 +1,40 @@
+{
+  "pages": [
+    {
+      "slug": "www-alberta-ca",
+      "url": "https://www.alberta.ca/",
+      "title": "Government of Alberta | Alberta.ca",
+      "fetched_at": "2026-05-12T04:34:45.663Z"
+    },
+    {
+      "slug": "www-alberta-ca-release-cfm-xid-96001813ba503-9e45-ac37-d438f38cc353444e",
+      "url": "https://www.alberta.ca/release.cfm?xID=96001813BA503-9E45-AC37-D438F38CC353444E",
+      "title": "Protecting Albertans from cybercriminals | Protection des Albertains contre les cybercriminels | alberta.ca",
+      "fetched_at": "2026-05-12T04:34:46.528Z"
+    },
+    {
+      "slug": "www-alberta-ca-all-services",
+      "url": "https://www.alberta.ca/all-services",
+      "title": "All services | Alberta.ca",
+      "fetched_at": "2026-05-12T04:34:47.312Z"
+    },
+    {
+      "slug": "www-alberta-ca-aish",
+      "url": "https://www.alberta.ca/aish",
+      "title": "Assured Income for the Severely Handicapped (AISH) | Alberta.ca",
+      "fetched_at": "2026-05-12T04:34:48.135Z"
+    },
+    {
+      "slug": "www-alberta-ca-technology-and-innovation",
+      "url": "https://www.alberta.ca/technology-and-innovation",
+      "title": "Technology and Innovation | Alberta.ca",
+      "fetched_at": "2026-05-12T04:34:49.001Z"
+    },
+    {
+      "slug": "www-alberta-ca-alberta-wallet",
+      "url": "https://www.alberta.ca/alberta-wallet",
+      "title": "Alberta Wallet | Alberta.ca",
+      "fetched_at": "2026-05-12T04:34:49.932Z"
+    }
+  ]
+}

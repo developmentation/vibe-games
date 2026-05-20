@@ -1,0 +1,26 @@
+{
+  "url": "https://www.alberta.ca/all-services",
+  "slug": "www-alberta-ca-all-services",
+  "title": "All services | Alberta.ca",
+  "fetched_at": "2026-05-12T04:34:47.312Z",
+  "body_class": "page-all-services section-all-services path-node page-node-type-all-services",
+  "client_rendered": false,
+  "stylesheets": [
+    "https://www.alberta.ca/sites/default/files/css/css_T7w9dx5gvG-nuOMcsCTX0GjsKrBoa1I7MMetoc9RSn4.css?delta=0&amp;language=en&amp;theme=goa_core&amp;include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY",
+    "https://www.alberta.ca/sites/default/files/css/css_k993VS5og3M4FXQRX-mKgEAZzXhK3c7AziQMqTl5ouw.css?delta=1&amp;language=en&amp;theme=goa_core&amp;include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY",
+    "https://www.alberta.ca/sites/default/files/css/css_sS7dz-mvJYB2BlWy6gYya0cwDFfrGKf-hoPlPZi4qvg.css?delta=2&amp;language=en&amp;theme=goa_core&amp;include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY"
+  ],
+  "scripts": [
+    "https://www.alberta.ca/sites/default/files/js/js_0tD5a6o0ykLev_WUm3FkMGRRhLuRWqGj-F4tkbvJeEU.js?scope=header&amp;delta=0&amp;language=en&amp;theme=goa_core&amp;include=eJxLz0-MT84vStVPz8lPSszRyc3My8wvSsxLT40vTszN0Ufj65WkFpcAAB1pFJM",
+    "https://www.alberta.ca/sites/default/files/js/js_KTmageY2OzniRudwg313hs2dzasx6mxescH0pcOliuo.js?scope=footer&amp;delta=0&amp;language=en&amp;theme=goa_core&amp;include=eJxLz0-MT84vStVPz8lPSszRyc3My8wvSsxLT40vTszN0Ufj65WkFpcAAB1pFJM"
+  ],
+  "meta_count": 23,
+  "landmarks": [
+    "header",
+    "nav",
+    "main",
+    "footer",
+    "form"
+  ],
+  "breadcrumbs": []
+}

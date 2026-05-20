@@ -1,0 +1,5 @@
+/* Short reference tables — remove the default 50rem scroll cap */
+.tiq-testing-table.goa-table {
+  max-height: none;
+  overflow: visible;
+}

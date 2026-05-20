@@ -178,10 +178,6 @@ The front end maintains a single source of truth (the master_json) and applies f
 
 ## Front-end requirements (ui-1)
 
-Single-page Vue 3 app loaded from CDN. Drop zone that accepts files at any time. Each drop adds to the queue and triggers `/upload` then `/process`. The form re-renders as fields land.
-
-Layout (one-column unless the viewport is wide):
-
 1. **Header**: case number, applicant suggestion (matching applicant from the DB by name + DOB once those fields are populated), completeness meter (0-100% with colour bands), Submit button (disabled until threshold met).
 2. **Drop zone**: drag-and-drop area, also clickable. Accepts PNG, JPG, PDF. Shows per-file upload progress (axios `onUploadProgress`) and per-file processing status (`pending` → `processing` → `done` or `error`) driven by SSE.
 3. **Form panel**: an accordion of nine sections matching the schema top-level groups. Each section is a FormKit-rendered group. Filled fields are bright; empty required fields are flagged with a soft warning ring. The user can edit any field directly.

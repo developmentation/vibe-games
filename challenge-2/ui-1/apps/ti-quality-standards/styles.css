@@ -1,0 +1,15 @@
+/* Inline code — GoA does not style <code> by default */
+code {
+  font-family: 'Courier New', Courier, monospace;
+  background: #f3f4f6;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.875em;
+  color: #333;
+}
+
+/* Short reference tables — remove the default 50rem scroll cap */
+.tiq-standards-table.goa-table {
+  max-height: none;
+  overflow: visible;
+}

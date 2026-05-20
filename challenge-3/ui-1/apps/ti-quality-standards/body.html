@@ -1,0 +1,122 @@
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>GoA coding standards</h2>
+    <p>All TI development teams must follow these coding standards for Government of Alberta projects. Standards apply regardless of the programming language or platform unless a language-specific exception is documented in your project's architecture decision record (ADR).</p>
+
+    <h3>General principles</h3>
+    <ul>
+      <li>Write code for the next developer, not just the compiler</li>
+      <li>Prefer readability over cleverness — optimise for understanding, not brevity</li>
+      <li>Follow the principle of least surprise: code should do exactly what its name implies</li>
+      <li>Keep functions and methods small and single-purpose (aim for under 30 lines)</li>
+      <li>Do not commit commented-out code; use version control history instead</li>
+    </ul>
+
+    <h3>Naming conventions</h3>
+    <div class="goa-table tiq-standards-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Element</th>
+            <th>Convention</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Variables &amp; functions</td>
+            <td>camelCase (JS/TS), snake_case (Python)</td>
+            <td><code>getUserProfile</code>, <code>get_user_profile</code></td>
+          </tr>
+          <tr>
+            <td>Classes &amp; types</td>
+            <td>PascalCase</td>
+            <td><code>UserProfileService</code></td>
+          </tr>
+          <tr>
+            <td>Constants</td>
+            <td>UPPER_SNAKE_CASE</td>
+            <td><code>MAX_RETRY_COUNT</code></td>
+          </tr>
+          <tr>
+            <td>Files (JS/TS)</td>
+            <td>kebab-case</td>
+            <td><code>user-profile.service.ts</code></td>
+          </tr>
+          <tr>
+            <td>Database tables &amp; columns</td>
+            <td>snake_case</td>
+            <td><code>user_profile</code>, <code>created_at</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Branching strategy</h2>
+    <p>All GoA repositories use a simplified GitFlow branching model. Deviations must be documented in the project's README and approved by the technical lead.</p>
+    <ul>
+      <li><strong>main</strong> — production-ready code. Protected. Merges only via an approved pull request.</li>
+      <li><strong>develop</strong> — integration branch for in-progress features. Protected. CI runs on every push.</li>
+      <li><strong>feature/&lt;ticket-id&gt;-short-description</strong> — individual feature work. Branch from develop; merge back to develop via pull request.</li>
+      <li><strong>hotfix/&lt;ticket-id&gt;-short-description</strong> — emergency production fixes. Branch from main; merge to both main and develop.</li>
+      <li><strong>release/&lt;version&gt;</strong> — release preparation. Branch from develop when a release is imminent; used for final testing and version bumps.</li>
+    </ul>
+    <div class="goa-callout goa--important">
+      <h2>Branch protection rules</h2>
+      <p>Direct pushes to <strong>main</strong> and <strong>develop</strong> are blocked on all GoA repositories. All merges require at least one approved reviewer and passing CI checks before the merge button is available.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Pull request checklist</h2>
+    <p>Before submitting a pull request for review, the author must confirm all of the following:</p>
+    <ol>
+      <li>Code compiles and all existing tests pass locally</li>
+      <li>New or changed functionality has corresponding unit tests with at least 80% coverage on new lines</li>
+      <li>No secrets, credentials, or environment-specific values are committed (use <code>.env</code> files and a secrets manager)</li>
+      <li>Code follows GoA naming conventions and the style guide for the language</li>
+      <li>Public functions, classes, and API endpoints have descriptive documentation comments</li>
+      <li>The PR description explains what changed, why it changed, and links to the relevant ticket</li>
+      <li>Security-sensitive changes have been flagged and a security review has been requested if required</li>
+      <li>Accessibility requirements have been considered for any user-facing changes</li>
+    </ol>
+
+    <h2>Code review process</h2>
+    <p>Code review is a mandatory step for all merges to protected branches. Reviewers are responsible for:</p>
+    <ul>
+      <li>Confirming the PR checklist has been completed by the author</li>
+      <li>Checking for logic errors, edge cases, and potential security vulnerabilities</li>
+      <li>Evaluating whether the approach aligns with the project's architecture and accepted patterns</li>
+      <li>Ensuring the code is readable, well-named, and appropriately documented</li>
+      <li>Providing constructive, specific feedback — avoiding general style preferences not covered by the linter</li>
+    </ul>
+    <div class="goa-callout goa--event">
+      <h2>Turnaround expectation</h2>
+      <p>Reviewers should complete reviews within one business day for routine pull requests. For time-sensitive hotfixes, contact the reviewer directly to request an expedited review.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Documentation requirements</h2>
+    <p>Every GoA project repository must include the following documentation at all times:</p>
+    <ul>
+      <li><strong>README.md</strong> — project overview, local setup steps, required environment variables, and a link to the architecture diagram</li>
+      <li><strong>CONTRIBUTING.md</strong> — how to contribute, coding standards reference, and the pull request process</li>
+      <li><strong>CHANGELOG.md</strong> — version history following <a href="https://keepachangelog.com/" rel="noopener noreferrer">Keep a Changelog</a> format</li>
+      <li><strong>Architecture decision records (ADRs)</strong> — stored in <code>docs/adr/</code>, one Markdown file per significant decision</li>
+      <li><strong>API documentation</strong> — OpenAPI 3.x spec for all HTTP APIs, generated and published to the GoA API catalogue</li>
+    </ul>
+    <p>Inline code comments should explain <em>why</em>, not <em>what</em>. Well-named identifiers already convey what the code does.</p>
+    <p>
+      <a class="goa-cta" href="/ti-quality-testing">Next: Testing practices</a>
+    </p>
+  </div>
+</div>

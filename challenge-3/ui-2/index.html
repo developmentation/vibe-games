@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Case Management Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+      html, body { height: 100%; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; }
+      [v-cloak] { display: none; }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div id="app" v-cloak class="min-h-screen flex flex-col">
+      <header class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Vibe Games</div>
+            <h1 class="text-xl font-bold">Case Management Console</h1>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-500">
+            <span class="inline-flex items-center gap-1.5">
+              <span :class="['inline-block w-2 h-2 rounded-full', health?.status === 'ok' ? 'bg-emerald-500' : 'bg-rose-500']"></span>
+              {{ health?.status || 'starting' }}
+            </span>
+            <span>{{ health?.service || '...' }}</span>
+          </div>
+        </div>
+        <nav class="max-w-7xl mx-auto px-6 flex gap-6 text-sm">
+          <button
+            v-for="t in tabs" :key="t.id"
+            @click="activeTab = t.id"
+            :class="['py-3 border-b-2 -mb-px transition', activeTab === t.id ? 'border-slate-900 text-slate-900 font-medium' : 'border-transparent text-slate-500 hover:text-slate-700']">
+            {{ t.label }}
+          </button>
+        </nav>
+      </header>
+
+      <main class="flex-1">
+        <div class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-12 gap-6">
+          <aside class="col-span-12 md:col-span-3 space-y-4">
+            <div class="bg-white border border-slate-200 rounded-xl p-4">
+              <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Filters</div>
+              <div class="space-y-2 text-sm">
+                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Open</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> In review</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Escalated</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="rounded" /> Resolved</label>
+              </div>
+              <div class="mt-4 text-xs text-slate-400">Wired to live data once <code>PROMPT.md</code> is executed.</div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-4">
+              <div class="text-xs font-semibold uppercase text-slate-500 mb-2">Shortcuts</div>
+              <ul class="space-y-1 text-sm">
+                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/api/health">/api/health</a></li>
+                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/api/schema">/api/schema</a></li>
+                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/ui-1/">ui-1 (intake)</a></li>
+                <li><a class="text-slate-700 hover:text-slate-900 underline" href="/ui-3/">ui-3 (reserved)</a></li>
+              </ul>
+            </div>
+          </aside>
+
+          <section class="col-span-12 md:col-span-9">
+            <div v-if="activeTab === 'queue'" class="bg-white border border-slate-200 rounded-xl">
+              <div class="px-5 py-3 border-b border-slate-200 flex items-center justify-between">
+                <h2 class="text-sm font-semibold">Triage queue</h2>
+                <div class="flex items-center gap-2 text-xs">
+                  <input type="text" placeholder="Search" class="border border-slate-200 rounded-md px-2 py-1 text-sm" />
+                  <button class="px-3 py-1 rounded-md bg-slate-900 text-white">Refresh</button>
+                </div>
+              </div>
+              <div class="p-10 text-center text-sm text-slate-500">
+                <div class="text-2xl font-light text-slate-300 mb-2">Empty queue</div>
+                <p>The live work tray. The build replaces this with the per-challenge feed (draft cases, unclassified tickets, students flagged for intervention).</p>
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'cases'" class="bg-white border border-slate-200 rounded-xl">
+              <div class="px-5 py-3 border-b border-slate-200">
+                <h2 class="text-sm font-semibold">Cases</h2>
+              </div>
+              <div class="divide-y divide-slate-100">
+                <div v-for="row in sampleRows" :key="row.id" class="px-5 py-3 flex items-center justify-between text-sm hover:bg-slate-50">
+                  <div>
+                    <div class="font-medium">{{ row.title }}</div>
+                    <div class="text-xs text-slate-500">{{ row.meta }}</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs">{{ row.status }}</span>
+                    <button class="text-xs text-slate-500 hover:text-slate-900">Open</button>
+                  </div>
+                </div>
+              </div>
+              <div class="px-5 py-3 border-t border-slate-200 text-xs text-slate-400">
+                Placeholder rows. Replace with a live fetch in the build.
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'workflow'" class="bg-white border border-slate-200 rounded-xl p-6">
+              <h2 class="text-sm font-semibold mb-3">Workflow</h2>
+              <ol class="space-y-3 text-sm">
+                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">01</span><div><div class="font-medium">Intake</div><div class="text-slate-500 text-xs">Caseworker creates a case, drops documents, kicks off processing.</div></div></li>
+                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">02</span><div><div class="font-medium">Extraction</div><div class="text-slate-500 text-xs">Vertex Claude vision agent populates the eligibility profile. SSE surfaces each merge.</div></div></li>
+                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">03</span><div><div class="font-medium">Review</div><div class="text-slate-500 text-xs">Caseworker fills gaps, requests more info, moves to recommendation.</div></div></li>
+                <li class="flex gap-3"><span class="font-mono text-slate-400 w-6">04</span><div><div class="font-medium">Decision</div><div class="text-slate-500 text-xs">Approve, reject, or hand off to a specialist reviewer. Letter generated by Sonnet.</div></div></li>
+              </ol>
+            </div>
+
+            <div v-if="activeTab === 'analytics'" class="bg-white border border-slate-200 rounded-xl p-6">
+              <h2 class="text-sm font-semibold mb-3">Analytics</h2>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="border border-slate-200 rounded-lg p-4">
+                  <div class="text-xs text-slate-500">Throughput</div>
+                  <div class="text-2xl font-bold mt-1">&mdash;</div>
+                  <div class="text-xs text-slate-400 mt-1">cases per hour</div>
+                </div>
+                <div class="border border-slate-200 rounded-lg p-4">
+                  <div class="text-xs text-slate-500">Avg completeness</div>
+                  <div class="text-2xl font-bold mt-1">&mdash;</div>
+                  <div class="text-xs text-slate-400 mt-1">across open cases</div>
+                </div>
+                <div class="border border-slate-200 rounded-lg p-4">
+                  <div class="text-xs text-slate-500">Decisions today</div>
+                  <div class="text-2xl font-bold mt-1">&mdash;</div>
+                  <div class="text-xs text-slate-400 mt-1">approve, reject, refer</div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="activeTab === 'settings'" class="bg-white border border-slate-200 rounded-xl p-6">
+              <h2 class="text-sm font-semibold mb-3">Settings</h2>
+              <dl class="grid grid-cols-2 gap-3 text-sm">
+                <dt class="text-slate-500">Service</dt><dd class="font-mono text-xs">{{ health?.service || '—' }}</dd>
+                <dt class="text-slate-500">Active UI</dt><dd class="font-mono text-xs">{{ health?.active_ui || '—' }}</dd>
+                <dt class="text-slate-500">Node</dt><dd class="font-mono text-xs">{{ health?.node_version || '—' }}</dd>
+                <dt class="text-slate-500">Uptime</dt><dd class="font-mono text-xs">{{ health?.uptime_seconds || 0 }}s</dd>
+              </dl>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-6 py-3 text-xs text-slate-500 flex items-center justify-between">
+          <span>Vibe Games hackathon prep</span>
+          <span>Caseworker console placeholder. Build per <code>PROMPT.md</code>.</span>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+      createApp({
+        setup() {
+          const health = ref(null);
+          const activeTab = ref('queue');
+          const tabs = [
+            { id: 'queue', label: 'Queue' },
+            { id: 'cases', label: 'Cases' },
+            { id: 'workflow', label: 'Workflow' },
+            { id: 'analytics', label: 'Analytics' },
+            { id: 'settings', label: 'Settings' },
+          ];
+          const sampleRows = [
+            { id: 1, title: 'Placeholder row A', meta: 'Replace with live API data in the build', status: 'draft' },
+            { id: 2, title: 'Placeholder row B', meta: 'Replace with live API data in the build', status: 'in_review' },
+            { id: 3, title: 'Placeholder row C', meta: 'Replace with live API data in the build', status: 'escalated' },
+          ];
+          onMounted(async () => {
+            try { health.value = (await axios.get('/api/health')).data; } catch { health.value = { status: 'unreachable' }; }
+          });
+          return { health, activeTab, tabs, sampleRows };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

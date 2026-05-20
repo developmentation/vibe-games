@@ -1,0 +1,31 @@
+{
+  "title": "DevSecOps and release management",
+  "meta_description": "CI/CD pipeline requirements, SAST and DAST security scanning, vulnerability management, release gates, and deployment strategies for GoA projects.",
+  "lede": "CI/CD pipeline requirements, security scanning, release gates, change management, and approved deployment strategies for GoA applications.",
+  "html_id": "ti-quality-devsecops",
+  "html_class": "js",
+  "body_class": "page-ti-quality-devsecops path-node",
+  "breadcrumbs": [
+    { "label": "Home", "href": "https://www.alberta.ca/" },
+    { "label": "Technology and innovation", "href": "https://www.alberta.ca/technology-and-innovation" },
+    { "label": "Quality practices for technology and innovation", "href": "/ti-quality" },
+    { "label": "DevSecOps and release management" }
+  ],
+  "parent": {
+    "label": "Quality practices for technology and innovation",
+    "href": "/ti-quality"
+  },
+  "sidebar": {
+    "eyebrow": "Explore pages in:",
+    "heading": "TI Quality Practices",
+    "heading_href": "/ti-quality",
+    "links": [
+      { "label": "Overview",                "href": "/ti-quality" },
+      { "label": "Standards & code review", "href": "/ti-quality-standards" },
+      { "label": "Testing practices",       "href": "/ti-quality-testing" },
+      { "label": "DevSecOps & release",     "href": "/ti-quality-devsecops",    "current": true },
+      { "label": "Continuous improvement",  "href": "/ti-quality-improvement" },
+      { "label": "Contact",                 "href": "https://www.alberta.ca/contact-government" }
+    ]
+  }
+}

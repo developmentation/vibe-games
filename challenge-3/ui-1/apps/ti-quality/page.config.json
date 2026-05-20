@@ -1,0 +1,26 @@
+{
+  "title": "Quality practices for technology and innovation",
+  "meta_description": "Standards, tools, and practices that help Government of Alberta TI teams deliver high-quality, secure, and accessible software.",
+  "lede": "Standards and practices for all Government of Alberta software development teams managed by Technology and Innovation.",
+  "html_id": "ti-quality",
+  "html_class": "js",
+  "body_class": "page-ti-quality path-node",
+  "breadcrumbs": [
+    { "label": "Home", "href": "https://www.alberta.ca/" },
+    { "label": "Technology and innovation", "href": "https://www.alberta.ca/technology-and-innovation" },
+    { "label": "Quality practices for technology and innovation" }
+  ],
+  "sidebar": {
+    "eyebrow": "Explore pages in:",
+    "heading": "TI Quality Practices",
+    "heading_href": "/ti-quality",
+    "links": [
+      { "label": "Overview",                "href": "/ti-quality",               "current": true },
+      { "label": "Standards & code review", "href": "/ti-quality-standards" },
+      { "label": "Testing practices",       "href": "/ti-quality-testing" },
+      { "label": "DevSecOps & release",     "href": "/ti-quality-devsecops" },
+      { "label": "Continuous improvement",  "href": "/ti-quality-improvement" },
+      { "label": "Contact",                 "href": "https://www.alberta.ca/contact-government" }
+    ]
+  }
+}

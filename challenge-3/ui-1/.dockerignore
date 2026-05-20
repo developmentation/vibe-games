@@ -1,0 +1,4 @@
+.git
+extractions
+apps/*/submissions.ndjson
+.claude/logs

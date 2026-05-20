@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="harness" class="js">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="How the Alberta.ca harness scaffolds Drupal-deployable prototypes — the 5 skills, the build pipeline, the 34 evaluator checks, and the GoA component conventions.">
+  <meta name="MobileOptimized" content="width">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/themes/custom/goa_core/favicon.ico" type="image/vnd.microsoft.icon">
+
+  <title>Alberta.ca harness — how it works</title>
+
+  <link href="/_shared/vendor/css/goa-base.css"          rel="stylesheet" media="screen,speech">
+  <link href="/_shared/vendor/css/goa-base.print.css"    rel="stylesheet" media="print">
+  <link href="/_shared/vendor/css/goa-layouts.css"       rel="stylesheet" media="screen,speech">
+  <link href="/_shared/vendor/css/goa-layouts.print.css" rel="stylesheet" media="print">
+  <link href="/_shared/vendor/css/goa-components.css"    rel="stylesheet" media="screen,speech">
+  <link href="/_shared/vendor/css/goa-components.print.css" rel="stylesheet" media="print">
+
+  <link href="/_shared/css/overrides.css" rel="stylesheet" media="all">
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="page-harness path-node">
+
+  <div class="dialog-off-canvas-main-canvas">
+
+    <header>
+      <div class="goa-skiplinks">
+        <a href="#main">Skip to content</a>
+      </div>
+
+      <div class="goa-header">
+        <div class="goa-logo-container">
+          <div class="goa-logo">
+            <a href="https://www.alberta.ca/">
+              <svg xmlns="http://www.w3.org/2000/svg" width="149" height="42" viewBox="0 0 216 61" shape-rendering="geometricPrecision" aria-label="Alberta.ca">
+                <rect class="logo" fill="#00aad2" x="196.411" y="31.014" width="19.59" height="19.592"></rect>
+                <path class="logo" fill="#5f6a72" d="M91.271,47.934c-1.972,0.198-4.068,0.382-6.278,0.548c0.833-6.288,4.105-15.027,8.177-13.62C95.521,35.676,94.284,43.033,91.271,47.934 M86.106,52.264c-0.714,0.111-1.304,0.101-1.773,0.014c0.28-0.241,0.455-0.594,0.455-1.014c0-0.266,0.009-0.544,0.024-0.832c1.104-0.052,2.831-0.177,4.888-0.376C88.623,51.241,87.409,52.067,86.106,52.264 M111.223,37.314c2.598-2.413,3.89-2.237,4.231-1.589c0.736,1.403-2.325,6.345-8.184,9.047C107.774,42.114,109.176,39.216,111.223,37.314 M207.625,39.712c-0.251-4.887-4.579-5.683-5.176-4.293c-0.208,0.487,1.626,0.313,1.633,3.764c0.005,5.71-5.787,13.165-13.167,13.165c-8.04,0-10.114-6.254-10.502-9.348c-0.256-2.058,0.187-5.029-3.368-4.636c-2.486,0.28-4.733,5.12-7.885,9.196c-2.704,3.499-3.918,3.166-3.286,0.163c0.783-3.763,3.925-12.594,7.517-13.237c1.661-0.297,2.257,2.625,3.02,0.796c0.768-1.832,0.063-5.783-3.655-5.783c-2.605,0-5.73,2.762-8.292,5.905c-2.233,2.744-13.522,19.357-18.257,15.77c-2.215-1.676-2.035-8.506-0.643-16.553c5.618-2.167,10.292-1.456,12.936-0.188c1.305,0.626,1.485,0.532,0.929-0.903c-0.825-2.108-5.345-5.405-12.405-3.888c-0.17,0.033-0.336,0.079-0.505,0.119c0.569-2.613,1.231-5.268,1.954-7.849c0.661-2.364,2.6-6.454-2.462-7.242c-1.613-0.252-0.927,0.53-1.459,2.71c-0.978,4.015-2.214,9.227-3.109,14.458c-4.161,2.396-8.035,6.399-10.874,11.667c0.492-2.429,1.254-5.116,1.308-6.93c0.054-1.911-1.255-2.332-1.763-2.482c-1.111-0.314-2.453,0.236-3.776,2.106c-3.104,4.37-7.035,11.284-13.001,14.184c-4.28,2.081-6.157-0.015-6.262-3.238c0.845-0.259,1.601-0.525,2.24-0.813c7.756-3.437,10.419-8.621,8.448-11.774c-1.87-3-7.217-2.086-11.439,2.361c-2.081,2.193-3.684,5.956-3.871,9.387c-1.79,0.387-3.848,0.731-6.146,1.041c3.644-5.911,3.329-13.9-2.001-15.247c-6.182-1.561-9.309,4.44-10.633,9.436c0.408-4.996,1.206-11.077,2.335-16.725c0.472-2.361,2.087-6.455-3.041-7.24c-1.629-0.252-1.377,0.505-1.241,2.71c0.18,2.958-3.096,20.875-1.384,28.744c-2.206,0.714-3.101,2.375-0.264,4.127c1.955,1.203,6.258,1.603,10.605-0.537c1.559-0.771,2.909-1.854,4.034-3.125c2.59-0.326,5.314-0.744,7.796-1.241c0.425,3.45,2.677,6.095,7.905,5.606c7.433-0.691,14.035-9.826,16.528-14.226c-0.45,4.716-3.519,15.019,1.716,14.49c2.051-0.208,1.158-0.536,1.285-2.306c0.454-6.208,5.62-11.47,10.73-14.694c-0.887,7.602-0.579,14.391,2.868,16.546c6.341,3.963,15.326-6.477,20.27-12.862c-2.516,5.671-3.945,12.936-0.164,14.047c4.435,1.293,7.932-6.063,12.022-11.693c0.475,4.042,3.168,11.003,14.033,11.003C200.729,54.163,208.007,47.148,207.625,39.712 M51.101,52.114c-2.665-0.965-6.464-2.513-11.424-5.046c2.717-0.991,6.169-2.443,9.806-4.345C49.973,46.873,50.505,49.892,51.101,52.114M80.545,57.718c-0.125-0.258-0.849,0.105-1.587-0.003c-2.101-0.31-4.863-3.18-5.699-7.896c-1.504-8.489-0.612-16.865,1.88-29.348c0.47-2.361,2.084-6.451-3.041-7.243c-1.63-0.251-0.786,0.554-1.243,2.71c-1.971,9.297-9.574,15.999-17.207,20.493c-0.799-10.645-0.474-22.465,1.53-29.714c1.691-6.115,3.703-4.992,1.209-6.277c-2.624-1.352-5.445,0.435-7.726,4.989c-2.28,4.552-12.795,29.289-29.584,45.984c-8.592,8.545-16.363,4.146-17.919,2.831c-1.266-1.069-1.734,0.582-0.163,2.271c6.949,7.494,17.1,3.194,20.795-0.5c10.215-10.21,22.092-32.19,26.897-41.517c-0.443,5.251-0.593,14.058,0.385,24.379c-5.199,2.533-9.86,4.021-12.059,4.601c-2.381,0.624-3.854,1.593-3.898,2.697c-0.047,1.208,1.552,2.227,3.863,3.325c4.116,1.954,16.167,7.647,19.136,9.374c2.543,1.476,3.784,0.325,4.537-1.268c0.983-2.076-1.716-3.276-4.328-4.057c-1.006-3.495-1.81-8.196-2.345-13.377c6.126-3.772,12.158-8.793,15.635-15.068c-0.876,5.245-3.124,23.08,2.507,30.621c1.241,1.662,3.981,3.479,6.656,3.209C80.036,58.805,80.671,57.977,80.545,57.718"></path>
+              </svg>
+              <span>Alberta.ca</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="goa-page-header goa-hero-banner">
+        <div class="goa-breadcrumbs goa-container">
+          <ul>
+            <li><a href="https://www.alberta.ca/">Home</a></li>
+            <li><a href="https://www.alberta.ca/technology-and-innovation">Technology and innovation</a></li>
+            <li><span>Alberta.ca harness</span></li>
+          </ul>
+        </div>
+    <div class="goa-hero" style="background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.75)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&amp;fit=crop&amp;w=1920&amp;q=80') center center; background-size: cover; background-repeat: no-repeat;">
+      <div class="goa-container">
+        <div class="goa-hero--header">
+          <h1 class="goa-hero-large-title"><span>Alberta.ca harness — how it works</span></h1>
+          <p class="goa-hero-large-lede">How the harness turns a one-sentence brief into a Drupal-deployable prototype, and the checks that gate sign-off.</p>
+        </div>
+      </div>
+    </div>
+      </div>
+    </header>
+
+    <main id="main" role="main">
+      <div class="goa-container">
+
+        <div class="goa-main-content">
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2>What the harness produces</h2>
+    <p>
+      The Alberta.ca harness turns a one-sentence brief into a working prototype — semantic
+      HTML, plain CSS, vanilla JavaScript, no bundler — that is aligned to the Government
+      of Alberta design system and ready to drop into Drupal for production. Each
+      prototype lives in its own folder under <code>apps/&lt;slug&gt;/</code> and is built
+      by slot-filling a hand-curated canonical template. There is one source of truth for
+      the chrome (header, footer, breadcrumb, sidebar nav) and one strict build path.
+    </p>
+
+    <p class="hb-jump">
+      Jump to:
+      <a href="#runtime-assets">Required assets</a> ·
+      <a href="#pipeline">Build pipeline</a> ·
+      <a href="#skills">The 5 skills</a> ·
+      <a href="#single-page">Single-page workflow</a> ·
+      <a href="#multi-page">Multi-page program workflow</a> ·
+      <a href="#evaluator">The 34 evaluator checks</a> ·
+      <a href="#api">Submit API</a> ·
+      <a href="#classes">GoA component classes</a> ·
+      <a href="#gotchas">Common gotchas</a> ·
+      <a href="#deployment">Drupal deployment</a> ·
+      <a href="#reset">Reset to clean slate</a>
+    </p>
+
+    <h2 id="runtime-assets">Required runtime assets</h2>
+    <p>
+      Four pieces must exist before <code>build.mjs</code> will produce a page. Three of
+      them are committed to the repo as part of the harness; the fourth is generated per
+      prototype.
+    </p>
+
+<div class="goa-table">
+    <table>
+      <thead>
+        <tr><th>Path</th><th>What it is</th><th>Owner</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.claude/</code></td>
+          <td>Skill code, hooks, settings. Five progressive-disclosure skills under <code>skills/</code>.</td>
+          <td>committed</td>
+        </tr>
+        <tr>
+          <td><code>CLAUDE.md</code></td>
+          <td>Canonical entrypoint Claude reads first. Workflow, invariants, GoA class table, reset commands.</td>
+          <td>committed</td>
+        </tr>
+        <tr>
+          <td><code>apps/_template/page.html</code></td>
+          <td>Hand-curated master with <code>&#123;&#123;SLOT&#125;&#125;</code> placeholders for title, breadcrumbs, sidebar, body, and meta. Imports the 6 GoA stylesheets.</td>
+          <td>committed</td>
+        </tr>
+        <tr>
+          <td><code>apps/_shared/vendor/css/</code></td>
+          <td>The 6 pre-split GoA stylesheets (<code>goa-base</code>, <code>goa-layouts</code>, <code>goa-components</code> &times; screen + print) sourced from the GoA core export.</td>
+          <td>committed</td>
+        </tr>
+        <tr>
+          <td><code>apps/&lt;slug&gt;/</code></td>
+          <td>Per-prototype folder. Contains <code>page.config.json</code>, <code>body.html</code>, <code>styles.css</code>, <code>app.js</code>, <code>requirements.md</code>, and the generated <code>index.html</code>.</td>
+          <td>per page</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+    <h2 id="pipeline">The build pipeline</h2>
+    <p>
+      Two human-readable inputs become one Drupal-deployable HTML file. No bundler, no
+      transpiler, no framework.
+    </p>
+
+<pre class="hb-diagram">
+apps/_shared/vendor/css/   goa-base.css, goa-layouts.css, goa-components.css
+                           + .print.css variants  (6 files, ~826 KB total)
+                                  &#9474;
+apps/_template/page.html  &#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;  canonical master with &#123;&#123;SLOT&#125;&#125; placeholders
+apps/_template/page.config.example.json
+                                  &#9474;
+apps/&lt;slug&gt;/page.config.json     &#9472;&#9472;&#9472;&#9472;&#9472;&#9510;
+apps/&lt;slug&gt;/body.html             &#9472;&#9472;&#9472;&#9472;&#9472;&#9508;  build.mjs (strict slot-filler)
+apps/&lt;slug&gt;/styles.css            &#9472;&#9472;&#9472;&#9472;&#9472;&#9508;  &#8226; any unfilled &#123;&#123;TOKEN&#125;&#125; aborts
+apps/&lt;slug&gt;/app.js                &#9472;&#9472;&#9472;&#9472;&#9472;&#9499;  &#8226; HTML-escapes every slot value
+                                  &#9474;
+                                  &#9660;
+apps/&lt;slug&gt;/index.html             ~14&#8211;22 KB generated page
+                                  &#9474;
+                                  &#9474;  serve.mjs (single)  or  serve-multi.mjs (program)
+                                  &#9660;
+http://localhost:5179/  or  http://localhost:5180/&lt;slug&gt;
+</pre>
+
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2 id="skills">The 5 skills</h2>
+    <p>
+      Each skill is a folder under <code>.claude/skills/</code> with a <code>SKILL.md</code>
+      and any helper scripts. Skills are loaded progressively — Claude reads the description
+      from the YAML frontmatter to decide whether to invoke a skill, then reads the body only
+      when needed.
+    </p>
+
+<div class="goa-table">
+    <table>
+      <thead>
+        <tr><th>Skill</th><th>Purpose</th><th>When invoked</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>extracting-alberta-pages</code></td>
+          <td>Refresh the vendored GoA stylesheets and canonical shell from upstream.</td>
+          <td>First setup, after a GoA redesign, when prototypes look out of date.</td>
+        </tr>
+        <tr>
+          <td><code>generating-alberta-page</code></td>
+          <td>Turn <code>page.config.json</code> + <code>body.html</code> into <code>index.html</code> by slot-filling the canonical template.</td>
+          <td>Every new page or rebuild.</td>
+        </tr>
+        <tr>
+          <td><code>hosting-prototype</code></td>
+          <td>Launch a local Node server. Single-app mode (<code>serve.mjs</code> in the app folder) or multi-app mode (<code>serve-multi.mjs</code> for whole programs).</td>
+          <td>After building, when the user wants to click through the prototype.</td>
+        </tr>
+        <tr>
+          <td><code>evaluating-prototype</code></td>
+          <td>Run 34 static checks against the built <code>index.html</code> — structure, design-system fidelity, JS hygiene, accessibility, responsiveness, and a requirements crosswalk.</td>
+          <td>Sign-off gate. A prototype is not done until <strong>0 FAIL</strong>.</td>
+        </tr>
+        <tr>
+          <td><code>writing-test-plan</code></td>
+          <td>Generate a human-tester checklist as <code>test-plan.md</code>. Has single-page and multi-page-program templates.</td>
+          <td>After the evaluator passes, before handing the prototype to a reviewer.</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+    <h2 id="single-page">Single-page workflow</h2>
+
+    <ol class="hb-steps">
+      <li>Pick a kebab-slug for the prototype (e.g. <code>report-red-tape</code>, <code>business-license-finder</code>).</li>
+      <li>Write <code>apps/&lt;slug&gt;/requirements.md</code> — bulleted, multi-word phrases so the evaluator crosswalk has signal.</li>
+      <li>Write <code>apps/&lt;slug&gt;/page.config.json</code> by copying <code>apps/_template/page.config.example.json</code> and filling in title, lede, breadcrumbs, parent, and (if multi-page) sidebar.</li>
+      <li>Write <code>apps/&lt;slug&gt;/body.html</code> as one or more <code>&lt;div class="goa-main-grid"&gt;…&lt;/div&gt;</code> blocks containing <code>.paragraph.paragraph--type--text-block.goa-column-XX-XX-XX</code> children.</li>
+      <li>Write <code>apps/&lt;slug&gt;/styles.css</code> for page-namespaced rules only.</li>
+      <li>Write <code>apps/&lt;slug&gt;/app.js</code> for page-namespaced behaviour (plain script, no ES imports, no globals).</li>
+      <li>Run <code>node .claude/skills/generating-alberta-page/scripts/build.mjs &lt;slug&gt;</code>. Any unfilled <code>&#123;&#123;TOKEN&#125;&#125;</code> aborts the build.</li>
+      <li>Copy <code>serve.mjs</code> into the app folder and launch on port 5179.</li>
+      <li>Run <code>node .claude/skills/evaluating-prototype/scripts/evaluate.mjs &lt;slug&gt;</code> until it reports 0 FAIL.</li>
+      <li>Write <code>apps/&lt;slug&gt;/test-plan.md</code> using the single-page template from the <code>writing-test-plan</code> skill.</li>
+    </ol>
+
+    <h2 id="multi-page">Multi-page program workflow</h2>
+
+    <p>
+      A "program" is N single-pages that share a single sidebar configuration. The typical
+      shape is one hub plus three topic pages plus an apply form. Real example:
+      <code>alberta-ip-office</code> with five pages — Overview, IP Creation, IP Protection,
+      IP Commercialization, Apply.
+    </p>
+
+    <ol class="hb-steps">
+      <li>Pick the program slug (e.g. <code>alberta-ip-office</code>) and the page set. Use the page-set sizing table in <code>generating-alberta-page/SKILL.md</code> if the brief does not match the canonical hub+3+apply shape.</li>
+      <li>Compose <strong>one</strong> sidebar config block. The links list every page slug; the <code>current: true</code> flag will be flipped per page.</li>
+      <li>Execute the single-page workflow once per page. Each <code>page.config.json</code> includes the same sidebar with <code>current: true</code> on its own slug.</li>
+      <li>Launch <code>serve-multi.mjs</code> on port 5180. Every page is reachable at <code>/&lt;slug&gt;</code> with working cross-links.</li>
+      <li>Evaluate every page. All must hit 0 FAIL.</li>
+      <li>Write one program-level <code>test-plan.md</code> (in the hub app folder) using the multi-page template — includes chrome-consistency and cross-page-navigation sections.</li>
+    </ol>
+
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2 id="evaluator">The 34 evaluator checks</h2>
+
+    <p>
+      <code>evaluate.mjs</code> runs static analysis on the built <code>index.html</code>.
+      Every check is either <strong>PASS</strong> (silent), <strong>WARN</strong>
+      (should fix; may be waived with a written reason), or <strong>FAIL</strong>
+      (blocks sign-off). A prototype is not declared done until every check is PASS
+      or WAIVED-with-reason.
+    </p>
+
+    <div class="goa-callout goa--important">
+      <h2>Sign-off rule</h2>
+      <p>
+        The harness treats <strong>0 FAIL</strong> as the bar for &ldquo;ready to
+        hand off to the Web team.&rdquo; Warnings are advisory but should be
+        addressed or waived with a written reason in code.
+      </p>
+    </div>
+
+    <details class="hb-faq-item">
+      <summary>Structure &mdash; 14 checks against the canonical template</summary>
+      <div class="hb-faq-body">
+        <ul>
+          <li><code>S1</code> Has <code>&lt;!DOCTYPE html&gt;</code></li>
+          <li><code>S2</code> <code>&lt;html lang="en"&gt;</code> set</li>
+          <li><code>S3</code> viewport meta present</li>
+          <li><code>S4</code> Single <code>&lt;h1&gt;</code></li>
+          <li><code>S5</code> Has <code>&lt;main id="main" role="main"&gt;</code></li>
+          <li><code>S6</code> <code>goa-skiplinks</code> block before the header</li>
+          <li><code>S7</code> <code>dialog-off-canvas-main-canvas</code> wrapper</li>
+          <li><code>S8</code> <code>&lt;header&gt;</code> present</li>
+          <li><code>S9</code> <code>goa-header</code> block</li>
+          <li><code>S10</code> <code>goa-logo</code> with the SVG wordmark</li>
+          <li><code>S11</code> <code>goa-breadcrumbs</code> present</li>
+          <li><code>S12</code> <code>goa-page-header</code> block</li>
+          <li><code>S13</code> <code>goa-footer</code> block</li>
+          <li><code>S14</code> Heading order never skips (h1 &rarr; h2 &rarr; h3, never h1 &rarr; h3)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="hb-faq-item">
+      <summary>Design-system fidelity &mdash; 9 checks</summary>
+      <div class="hb-faq-body">
+        <ul>
+          <li><code>D1</code> Imports <code>goa-base.css</code></li>
+          <li><code>D2</code> Imports <code>goa-layouts.css</code></li>
+          <li><code>D3</code> Imports <code>goa-components.css</code></li>
+          <li><code>D4</code> Imports all 3 print stylesheets</li>
+          <li><code>D5</code> No live alberta.ca CSS bundle URLs (no <code>sites/default/files/css/</code> in <code>&lt;link&gt;</code>)</li>
+          <li><code>D6</code> No legacy monolithic <code>/_shared/vendor/alberta&#46;css</code></li>
+          <li><code>D7</code> Forms use <code>.goa-form</code> and <code>.goa-field</code> (FAIL)</li>
+          <li><code>D7b</code> Buttons use <code>.goa-button</code> (FAIL)</li>
+          <li><code>D7c</code> No legacy <code>.form-item</code> / <code>.form-required</code> / <code>.form-text</code> (WARN)</li>
+          <li><code>D8</code> No utility-CSS framework imports (T&#97;ilwind / B&#111;otstrap / Bul&#109;a / Found&#97;tion)</li>
+          <li><code>D9</code> All 6 vendored CSS files exist on disk</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="hb-faq-item">
+      <summary>JS hygiene &mdash; 4 checks (anything that crashes the page)</summary>
+      <div class="hb-faq-body">
+        <ul>
+          <li><code>J1</code> No orphan <code>goa&#46;init</code> / <code>ab&#46;init</code> / <code>abComponents&#46;init</code> calls</li>
+          <li><code>J2</code> No Google Tag Manager scripts</li>
+          <li><code>J3</code> No drupal-settings JSON blob</li>
+          <li><code>J4</code> At most one <code>&lt;script src="./app.js"&gt;</code> tag</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="hb-faq-item">
+      <summary>Accessibility heuristics &mdash; 4 checks</summary>
+      <div class="hb-faq-body">
+        <ul>
+          <li><code>A1</code> Every <code>&lt;img&gt;</code> has <code>alt</code></li>
+          <li><code>A2</code> Every form control has a <code>&lt;label for&gt;</code></li>
+          <li><code>A3</code> Live region for form errors (<code>aria-live</code>)</li>
+          <li><code>A4</code> <code>&lt;noscript&gt;</code> fallback present when there is a form</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="hb-faq-item">
+      <summary>Responsiveness &mdash; 1 check</summary>
+      <div class="hb-faq-body">
+        <ul>
+          <li><code>R1</code> viewport sets <code>initial-scale=1</code></li>
+        </ul>
+        <p>
+          Visual responsive behaviour at 320px / 768px / 1280px is verified by the
+          human test plan, not the static evaluator. The vendored GoA CSS handles the
+          breakpoints; the evaluator only verifies the meta tag is correctly set.
+        </p>
+      </div>
+    </details>
+
+    <details class="hb-faq-item">
+      <summary>Requirements crosswalk</summary>
+      <div class="hb-faq-body">
+        <p>
+          For each line in <code>apps/&lt;slug&gt;/requirements.md</code>, the evaluator
+          extracts tokens of 4 or more characters and counts how many appear in the
+          rendered HTML. If at least half match, the requirement is marked PASS;
+          otherwise MISSING. The crosswalk produces a separate table in
+          <code>evaluation.md</code> below the structural checks.
+        </p>
+        <p>
+          Write requirements as <strong>multi-word phrases that reference specific
+          UI labels and field names</strong>. Single-word bullets trivially pass and
+          give the crosswalker no real signal.
+        </p>
+      </div>
+    </details>
+
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2 id="api">Submit API contract</h2>
+
+    <p>
+      Both servers expose <code>POST /api/submit</code> for form submissions. The endpoint
+      accepts any JSON body and appends one NDJSON line to the appropriate
+      <code>submissions.ndjson</code> file. The server adds <code>received_at</code> and,
+      in multi-app mode, <code>slug</code> (derived from the Referer header).
+    </p>
+
+    <h3>Request</h3>
+<pre class="hb-code">POST /api/submit
+Content-Type: application/json
+
+{ "any": "shape", "the": "form posts" }
+</pre>
+
+    <h3>Response (success)</h3>
+<pre class="hb-code">HTTP 200
+Content-Type: application/json
+
+{ "ok": true, "id": "2026-05-12T05:14:51.257Z" }
+</pre>
+
+    <h3>Persisted NDJSON line</h3>
+<pre class="hb-code hb-code--wrap">{"received_at":"2026-05-12T05:14:51.257Z","slug":"alberta-ip-office-apply","applicant_name":"Smoke Test","contact_email":"smoke@example.com","stage":"protection"}
+</pre>
+
+    <ul>
+      <li><code>received_at</code> &mdash; always added by the server (UTC ISO timestamp). Also returned as the response <code>id</code>.</li>
+      <li><code>slug</code> &mdash; added by the multi-app server only. Inferred from the Referer header. The single-app server omits it because the slug is implicit in the file path.</li>
+      <li>Everything else is verbatim from the request JSON body.</li>
+      <li>Bodies that fail to parse as JSON are still recorded as <code>{"raw": "&lt;text&gt;"}</code>.</li>
+    </ul>
+
+    <p>
+      Read back submissions via <code>GET /api/submissions</code> (single-app) or
+      <code>GET /api/submissions?slug=&lt;slug&gt;</code> (multi-app). Returns the NDJSON file
+      as <code>text/plain</code>.
+    </p>
+
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2 id="classes">Real GoA component classes</h2>
+
+    <p>
+      The vendored <code>goa-components.css</code> styles a specific vocabulary. Using
+      generic Drupal classes (<code>.form-item</code>, <code>.form-required</code>,
+      <code>.description</code>) or hand-rolled names (<code>.btn</code>, <code>.card</code>)
+      yields unstyled browser defaults that look broken. Grep
+      <code>apps/_shared/vendor/css/goa-components.css</code> before inventing a class.
+    </p>
+
+<div class="goa-table">
+    <table>
+      <thead><tr><th>Use this</th><th>Not this</th></tr></thead>
+      <tbody>
+        <tr><td><code>&lt;div class="goa-form"&gt;&lt;form&gt;…&lt;/form&gt;&lt;/div&gt;</code></td><td>bare <code>&lt;form&gt;</code></td></tr>
+        <tr><td><code>&lt;div class="goa-field"&gt;&lt;label&gt;…&lt;/label&gt;&lt;input&gt;&lt;/div&gt;</code></td><td><code>&lt;div class="form&#45;item"&gt;…&lt;/div&gt;</code></td></tr>
+        <tr><td><code>&lt;label for="x"&gt;Label&lt;/label&gt;</code> (required is default)</td><td>inventing your own asterisk markup</td></tr>
+        <tr><td><code>&lt;label&gt;Label &lt;span class="optional"&gt;(optional)&lt;/span&gt;&lt;/label&gt;</code></td><td>omitting the optional hint</td></tr>
+        <tr><td><code>&lt;div class="goa-option"&gt;&lt;input type="checkbox"&gt;&lt;label&gt;…&lt;/label&gt;&lt;/div&gt;</code></td><td>bare checkboxes</td></tr>
+        <tr><td><code>&lt;button class="goa-button"&gt;Primary&lt;/button&gt;</code></td><td><code>&lt;button class="btn"&gt;</code></td></tr>
+        <tr><td><code>&lt;button class="goa-button goa--secondary"&gt;Secondary&lt;/button&gt;</code></td><td>bare <code>&lt;button&gt;</code></td></tr>
+        <tr><td><code>&lt;div class="goa-field goa--error"&gt;</code> + <code>&lt;div class="error-help"&gt;…&lt;/div&gt;</code></td><td>custom error classes</td></tr>
+        <tr><td><code>&lt;div class="goa-callout goa--important"&gt;</code> (also <code>--success</code>, <code>--error</code>, <code>--emergency</code>, <code>--event</code>)</td><td>bare <code>&lt;div class="goa-callout"&gt;</code> for body callouts (it is a large bold pull-quote — see gotchas)</td></tr>
+        <tr><td><code>&lt;div class="goa-card goa--open"&gt;…&lt;/div&gt;</code></td><td><code>&lt;div class="card"&gt;</code></td></tr>
+      </tbody>
+    </table>
+</div>
+
+    <h2 id="gotchas">Common gotchas</h2>
+
+    <h3>Callout variants are not optional</h3>
+    <p>
+      The bare <code>&lt;div class="goa-callout"&gt;</code> renders every child element at
+      24px / weight 700 / dark blue &mdash; a pull-quote treatment for single emphasis
+      lines. Multi-line body callouts must use a variant
+      (<code>goa--important</code>, <code>goa--success</code>, <code>goa--error</code>,
+      <code>goa--emergency</code>, <code>goa--event</code>). If a proposed intro callout
+      repeats the page-header lede, delete it &mdash; the lede is enough.
+    </p>
+
+    <h3>html_class only needs &ldquo;js&rdquo;</h3>
+    <p>
+      Older alberta.ca pages set classes like <code>goa-stats-template</code> and
+      <code>goa-loader-reset</code> on the <code>&lt;html&gt;</code> element. Those are
+      vestigial &mdash; nothing in the vendored CSS references them. The harness default
+      is <code>html_class: "js"</code> and that is sufficient.
+    </p>
+
+    <h3>Forms must use goa-field, not form-item</h3>
+    <p>
+      Generic Drupal Forms API classes (<code>.form-item</code>, <code>.form-required</code>,
+      <code>.description</code>) are not styled by goa-components.css. They render as
+      browser defaults. Use <code>&lt;div class="goa-field"&gt;</code> for every input,
+      <code>&lt;span class="optional"&gt;(optional)&lt;/span&gt;</code> for optional hints,
+      and <code>&lt;div class="error-help"&gt;</code> for inline error messages.
+    </p>
+
+    <h3>No goa&#46;init or ab&#46;init</h3>
+    <p>
+      The real alberta.ca pages include inline scripts like <code>goa&#46;init(...)</code> and
+      <code>ab&#46;init(...)</code> that reference a runtime JS bundle this harness does not
+      ship. Including them in <code>body.html</code> causes a
+      <code>ReferenceError: goa is not defined</code> on load. The static CSS is
+      sufficient for prototype chrome; the runtime is only needed for off-canvas mobile
+      menus, which prototypes do not use.
+    </p>
+
+    <h3>Theme assets are proxied</h3>
+    <p>
+      The favicon and other <code>/themes/custom/goa_core/*</code> assets are not vendored.
+      Both servers proxy <code>/themes/</code>, <code>/sites/</code>,
+      <code>/system/files/</code>, and <code>/misc/</code> to <code>www.alberta.ca</code> so
+      any missed asset reference returns 200 instead of 404. This proxy is bounded to
+      those four path prefixes; everything else still 404s for genuinely missing files.
+    </p>
+
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+
+    <h2 id="deployment">Drupal deployment</h2>
+
+    <p>
+      The harness output is structured to be paste-ready into Drupal Paragraphs. Each
+      prototype maps to a Drupal node:
+    </p>
+
+<div class="goa-table">
+    <table>
+      <thead><tr><th>Prototype artifact</th><th>Drupal home</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>page.config.json</code></td>
+          <td>Drupal node fields &mdash; title, lede, breadcrumb parent, sidebar nav configuration.</td>
+        </tr>
+        <tr>
+          <td><code>body.html</code></td>
+          <td>Pasted into Drupal Paragraphs (Text Block paragraph type). The <code>.goa-main-grid</code> + <code>.paragraph.goa-column-XX-XX-XX</code> structure mirrors how Drupal renders multi-column paragraphs.</td>
+        </tr>
+        <tr>
+          <td><code>styles.css</code></td>
+          <td>Attached as a Drupal library (page-specific). Should remain small &mdash; bulk styling is provided by the live <code>goa_core</code> theme.</td>
+        </tr>
+        <tr>
+          <td><code>app.js</code></td>
+          <td>Attached as a Drupal library (page-specific). The submit URL is rewritten from <code>/api/submit</code> to the production webform endpoint at deployment time.</td>
+        </tr>
+        <tr>
+          <td>header / footer / breadcrumb chrome</td>
+          <td>Provided by the live <code>goa_core</code> Drupal theme. Not deployed.</td>
+        </tr>
+        <tr>
+          <td>vendored GoA CSS</td>
+          <td>Already in production via the <code>goa_core</code> theme. Not deployed.</td>
+        </tr>
+      </tbody>
+    </table>
+</div>
+
+    <h2 id="reset">Reset to a clean slate</h2>
+
+    <p>
+      To start fresh while keeping the harness intact, delete every prototype folder under
+      <code>apps/</code> except <code>_template/</code> and <code>_shared/</code>:
+    </p>
+
+<pre class="hb-code">ls apps | grep -v -E '^(_template|_shared)$' | xargs -I {} rm -rf apps/{}
+rm -rf .claude/logs extractions
+</pre>
+
+    <p>
+      The harness will still build the next prototype on demand. <code>apps/_template/</code>
+      and <code>apps/_shared/vendor/css/</code> remain because they are the runtime
+      dependencies, not session output.
+    </p>
+
+    <div class="goa-callout goa--success">
+      <h2>Sufficient on its own</h2>
+      <p>
+        After a clean slate, a fresh Claude session reading
+        <code>CLAUDE.md</code> plus the five <code>SKILL.md</code> files has everything it
+        needs to reproduce a working prototype from a one-sentence brief. The reference
+        apps under <code>apps/</code> are optional examples, not load-bearing
+        documentation.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="goa-footer">
+      <div class="goa-container">
+        <a href="https://www.alberta.ca/" title="Home" class="goa-logo">Alberta.ca</a>
+
+        <div class="goa-footer--links">
+          <div id="goa-quicklinks" class="goa-list">
+            <nav role="navigation" class="goa-list">
+              <h2 class="visually-hidden">Footer</h2>
+              <ul class="menu__main_nav menu__primary_footer">
+                <li class="menu_footer__item"><a href="https://www.alberta.ca/ministries" class="menu_footer__link">Ministries</a></li>
+                <li class="menu_footer__item"><a href="https://www.alberta.ca/find-a-job" class="menu_footer__link">Jobs</a></li>
+                <li class="menu_footer__item"><a href="https://www.alberta.ca/contact-government" class="menu_footer__link">Contact government</a></li>
+                <li class="menu_footer__item"><a href="https://www.alberta.ca/staff-directory.cfm" class="menu_footer__link">Staff directory</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div id="goa-aboutlinks" class="goa-list">
+            <nav role="navigation" class="goa-list">
+              <h2 class="visually-hidden">About links</h2>
+              <ul class="menu__main_nav menu__primary_about-links">
+                <li class="menu_about-links__item"><a href="https://www.alberta.ca/usingthissite" class="menu_about-links__link">Using Alberta.ca</a></li>
+                <li class="menu_about-links__item"><a href="https://www.alberta.ca/disclaimer" class="menu_about-links__link">Disclaimer</a></li>
+                <li class="menu_about-links__item"><a href="https://www.alberta.ca/privacystatement" class="menu_about-links__link">Privacy</a></li>
+                <li class="menu_about-links__item"><a href="https://www.alberta.ca/accessibility" class="menu_about-links__link">Accessibility</a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <div class="goa-footer--social-copy">
+          <div class="goa-copyright">© 2026 Government of Alberta</div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
