@@ -1,0 +1,150 @@
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Retrospectives</h2>
+    <p>All TI delivery teams must run a retrospective at the end of every sprint or iteration. Retrospectives are the primary mechanism for surfacing quality improvement opportunities and must produce specific, assigned, and time-boxed action items tracked in the team's backlog.</p>
+
+    <h3>Recommended format</h3>
+    <ul>
+      <li><strong>What went well</strong> — identify practices the team wants to continue or amplify in the next sprint</li>
+      <li><strong>What could be better</strong> — identify friction points, recurring blockers, or quality gaps</li>
+      <li><strong>Action items</strong> — one to three specific, assigned, time-boxed improvements for the next sprint</li>
+    </ul>
+    <p>Retrospective notes and action items must be stored in the project wiki or Confluence space and linked from the sprint summary. Action items not completed in the sprint they were assigned must be re-evaluated at the next retrospective — not silently dropped.</p>
+
+    <h2>Quality metrics</h2>
+    <p>All TI project teams are expected to track and review the following four key quality indicators each sprint. Results are reviewed monthly in the TI Quality dashboard.</p>
+
+    <div class="goa-table tiq-improvement-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>What it measures</th>
+            <th>Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Defect density</td>
+            <td>Number of defects per 1,000 lines of new code delivered</td>
+            <td>Less than 1.0</td>
+          </tr>
+          <tr>
+            <td>Test coverage</td>
+            <td>Percentage of new lines covered by automated tests</td>
+            <td>80% or higher</td>
+          </tr>
+          <tr>
+            <td>Deployment frequency</td>
+            <td>How often the team successfully deploys to production</td>
+            <td>At least once per sprint</td>
+          </tr>
+          <tr>
+            <td>Mean time to recovery (MTTR)</td>
+            <td>Average time to restore service after a production incident</td>
+            <td>Under 4 hours</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Teams significantly outside target ranges will be engaged by the TI Quality team to develop a time-bound improvement plan.</p>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Technical debt management</h2>
+    <p>Technical debt is a normal part of software development and must be actively managed. Each TI project must have a documented approach to identifying, prioritising, and reducing technical debt over time.</p>
+    <h3>GoA approach</h3>
+    <ul>
+      <li>Maintain a dedicated technical debt backlog separate from the feature backlog</li>
+      <li>Reserve at least <strong>20% of sprint capacity</strong> for debt reduction, refactoring, and dependency updates</li>
+      <li>Label debt items by category: <em>architecture</em>, <em>code quality</em>, <em>dependency updates</em>, <em>test coverage</em>, <em>documentation</em></li>
+      <li>Use SonarCloud's maintainability rating to track code quality trends over time and surface high-value cleanup opportunities</li>
+      <li>Review the technical debt backlog in sprint planning — debt items must compete for priority alongside features, not be deferred indefinitely</li>
+    </ul>
+    <div class="goa-callout goa--important">
+      <h2>Security-related debt is critical</h2>
+      <p>Technical debt involving outdated dependencies with known CVEs, deprecated authentication mechanisms, or unencrypted data storage must be treated with the same urgency as a security finding. It cannot be deferred to a future sprint without an approved risk acceptance.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Post-incident reviews</h2>
+    <p>All production incidents resulting in service degradation, data issues, or a security event must be followed by a blameless post-mortem within five business days of resolution.</p>
+    <p>Every post-mortem document must include:</p>
+    <ul>
+      <li>A timeline of events from first symptom to full resolution</li>
+      <li>The root cause — not just the proximate trigger</li>
+      <li>What worked well in the detection and response</li>
+      <li>What could have been detected or resolved faster</li>
+      <li>Specific, assigned action items to prevent recurrence, tracked in the project backlog</li>
+    </ul>
+    <p>Post-mortem summaries are shared with the broader TI community via the monthly quality update. Teams are encouraged to present learnings at the TI Community of Practice meetings.</p>
+
+    <h2>Capability maturity self-assessment</h2>
+    <p>Use the checklist below to assess your team's current quality maturity. Each practice represents a capability your team either has in place or is working toward. Gaps are improvement opportunities to raise in your next retrospective.</p>
+
+    <div class="goa-table tiq-improvement-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Practice</th>
+            <th>Maturity level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>All code changes go through a pull request with at least one reviewer</td>
+            <td>Foundational</td>
+          </tr>
+          <tr>
+            <td>Unit tests are written alongside code and coverage is tracked in CI</td>
+            <td>Foundational</td>
+          </tr>
+          <tr>
+            <td>CI pipeline runs on every push and blocks merges on failure</td>
+            <td>Foundational</td>
+          </tr>
+          <tr>
+            <td>SAST and dependency scanning are automated in the CI pipeline</td>
+            <td>Managed</td>
+          </tr>
+          <tr>
+            <td>End-to-end tests cover all primary user journeys</td>
+            <td>Managed</td>
+          </tr>
+          <tr>
+            <td>Quality metrics are reviewed each sprint and trended over time</td>
+            <td>Managed</td>
+          </tr>
+          <tr>
+            <td>Technical debt is actively tracked and at least 20% of sprint capacity is reserved for reduction</td>
+            <td>Advanced</td>
+          </tr>
+          <tr>
+            <td>DAST scan passes before every production release</td>
+            <td>Advanced</td>
+          </tr>
+          <tr>
+            <td>Post-incident reviews are completed within five business days and learnings are shared</td>
+            <td>Advanced</td>
+          </tr>
+          <tr>
+            <td>Deployment frequency is at least once per sprint with no manual release steps</td>
+            <td>Optimizing</td>
+          </tr>
+          <tr>
+            <td>MTTR is tracked and improving sprint-over-sprint through targeted reliability work</td>
+            <td>Optimizing</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <a class="goa-cta" href="/ti-quality">Back to overview</a>
+    </p>
+  </div>
+</div>

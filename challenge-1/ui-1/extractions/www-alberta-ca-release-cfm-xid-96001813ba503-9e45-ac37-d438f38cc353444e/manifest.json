@@ -1,0 +1,32 @@
+{
+  "url": "https://www.alberta.ca/release.cfm?xID=96001813BA503-9E45-AC37-D438F38CC353444E",
+  "slug": "www-alberta-ca-release-cfm-xid-96001813ba503-9e45-ac37-d438f38cc353444e",
+  "title": "Protecting Albertans from cybercriminals | Protection des Albertains contre les cybercriminels | alberta.ca",
+  "fetched_at": "2026-05-12T04:34:46.528Z",
+  "body_class": "announcement ",
+  "client_rendered": false,
+  "stylesheets": [
+    "https://www.alberta.ca/build/20220316/css/ab-layouts.min.css",
+    "https://www.alberta.ca/build/20220316/css/ab-layouts.print.min.css",
+    "https://www.alberta.ca/build/20220316/css/goa-components.min.css",
+    "https://www.alberta.ca/build/20220316/css/goa-components.print.min.css",
+    "https://www.alberta.ca/build/20220316/css/ab-components.min.css",
+    "https://www.alberta.ca/build/20220316/css/ab-components.print.min.css",
+    "https://www.alberta.ca/build/20220316/css/goa-standalone.min.css",
+    "https://www.alberta.ca/build/20220316/css/goa-standalone.print.min.css"
+  ],
+  "scripts": [
+    "https://www.alberta.ca/build/20220316/js/ab-layouts.min.js",
+    "https://www.alberta.ca/build/20220316/js/goa-components.min.js",
+    "https://www.alberta.ca/build/20220316/js/ab-components.min.js"
+  ],
+  "meta_count": 20,
+  "landmarks": [
+    "header",
+    "main",
+    "aside",
+    "footer",
+    "form"
+  ],
+  "breadcrumbs": []
+}

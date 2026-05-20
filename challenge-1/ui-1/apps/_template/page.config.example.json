@@ -1,0 +1,43 @@
+{
+  "_doc": "Shape for apps/<slug>/page.config.json. Slot-filled into apps/_template/page.html by build.mjs. Keys are listed in order of importance. Comment keys (anything starting with _) are ignored by the build.",
+
+  "title": "Page title",
+  "meta_description": "Under 160 chars. Appears in <meta name=description> and og:description.",
+  "lede": "One-sentence lede that sits under the H1 in the GoA page header.",
+
+  "_doc_html_classes": "html_class only needs the 'js' modernizr-style class. Other strings like goa-stats-template are vestigial from the upstream template and have no effect — keep the default unless you have a reason.",
+  "html_id": "page-slug-id",
+  "html_class": "js",
+  "body_class": "page-slug path-node",
+
+  "breadcrumbs": [
+    { "label": "Home", "href": "https://www.alberta.ca/" },
+    { "label": "Section", "href": "https://www.alberta.ca/section" },
+    { "label": "This page (last item — no href, renders as <span>)" }
+  ],
+
+  "parent": {
+    "_doc": "Optional. Renders the 'Part of …' link above the H1 on sub-pages of a program. Only used when there is no hero (hero blocks do not include the parent link).",
+    "label": "Section name",
+    "href": "https://www.alberta.ca/section"
+  },
+
+  "hero": {
+    "_doc": "Optional. When set, the page header renders as the alberta.ca hero-banner pattern (background image + dark gradient + large title + lede), matching pages like /all-services and /technology-and-innovation. When omitted, the page header is the standard text-only block. The breadcrumb is rendered in both cases. Keep TITLE under 60 chars and LEDE under 160 for legibility against the photo.",
+    "image_url": "/system/files/styles/responsive_2080/private/banner.jpg",
+    "position": "center center"
+  },
+
+  "sidebar": {
+    "_doc": "Optional. When present, renders the .goa-sidebar-content nav. Use the SAME sidebar across every page of a multi-page program and flip current:true on the link matching that page's slug. eyebrow defaults to 'Explore pages in:' if omitted.",
+    "heading": "Program name",
+    "heading_href": "/program-slug",
+    "links": [
+      { "label": "Overview", "href": "/program-slug", "current": true },
+      { "label": "Topic A", "href": "/program-slug-topic-a" },
+      { "label": "Topic B", "href": "/program-slug-topic-b" },
+      { "label": "Apply",   "href": "/program-slug-apply" },
+      { "label": "Contact (external)", "href": "https://www.alberta.ca/contact-government" }
+    ]
+  }
+}

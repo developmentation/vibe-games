@@ -1,0 +1,136 @@
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>CI/CD pipeline requirements</h2>
+    <p>Every TI-managed application must have a CI/CD pipeline configured in Azure DevOps or GitHub Actions. Pipelines automate build, test, security scanning, and deployment — reducing manual effort and ensuring consistent quality gates are enforced on every change without exception.</p>
+    <p>All pipelines must include the following stages in order:</p>
+
+    <div class="goa-table tiq-devsecops-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>What it does</th>
+            <th>Required?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Build</td>
+            <td>Compile code, resolve dependencies, produce build artefacts</td>
+            <td>Yes — all projects</td>
+          </tr>
+          <tr>
+            <td>Unit test</td>
+            <td>Run unit tests and enforce the 80% coverage threshold</td>
+            <td>Yes — all projects</td>
+          </tr>
+          <tr>
+            <td>Lint and format</td>
+            <td>Check code style and formatting against project standards</td>
+            <td>Yes — all projects</td>
+          </tr>
+          <tr>
+            <td>SAST scan</td>
+            <td>Static application security testing on source code</td>
+            <td>Yes — all projects</td>
+          </tr>
+          <tr>
+            <td>Dependency scan</td>
+            <td>Check third-party libraries for known CVEs</td>
+            <td>Yes — all projects</td>
+          </tr>
+          <tr>
+            <td>Integration test</td>
+            <td>Run integration tests against containerised dependencies</td>
+            <td>When applicable</td>
+          </tr>
+          <tr>
+            <td>Deploy to staging</td>
+            <td>Deploy the build artefact to the staging environment</td>
+            <td>Yes — on develop/main merge</td>
+          </tr>
+          <tr>
+            <td>DAST scan</td>
+            <td>Dynamic security testing against the running staging application</td>
+            <td>Yes — before every production release</td>
+          </tr>
+          <tr>
+            <td>E2E and accessibility test</td>
+            <td>Run browser E2E tests and axe-core accessibility scan on staging</td>
+            <td>Yes — before every production release</td>
+          </tr>
+          <tr>
+            <td>Deploy to production</td>
+            <td>Deploy to production after manual approval gate is cleared</td>
+            <td>Yes — with approval gate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Security scanning</h2>
+
+    <h3>Static application security testing (SAST)</h3>
+    <p>SAST runs on every commit and analyses source code for security vulnerabilities without executing the application.</p>
+    <ul>
+      <li><strong>Approved tools:</strong> SonarCloud, Semgrep, GitHub Advanced Security (CodeQL)</li>
+      <li>Critical and high severity findings must be resolved before a merge to <strong>main</strong> is permitted</li>
+      <li>Medium and low severity findings must be tracked as tickets in the project's security backlog</li>
+    </ul>
+
+    <h3>Dynamic application security testing (DAST)</h3>
+    <p>DAST runs against the deployed staging environment before every production release.</p>
+    <ul>
+      <li><strong>Approved tool:</strong> OWASP ZAP (automated scan configured in the CI pipeline)</li>
+      <li>All OWASP Top 10 findings at medium severity or higher must be resolved before a production deployment is permitted</li>
+      <li>DAST reports are uploaded to the project's security dashboard in Azure DevOps and retained for 12 months</li>
+    </ul>
+
+    <h3>Dependency and SCA scanning</h3>
+    <p>Software Composition Analysis (SCA) checks third-party libraries against the National Vulnerability Database for known CVEs.</p>
+    <ul>
+      <li><strong>Approved tools:</strong> Dependabot (GitHub), npm audit, Snyk</li>
+      <li>Critical severity CVEs must be resolved within <strong>5 business days</strong> of detection</li>
+      <li>High severity CVEs must be resolved within <strong>15 business days</strong></li>
+      <li>Medium and low severity CVEs are prioritised in the next regular sprint</li>
+    </ul>
+    <div class="goa-callout goa--important">
+      <h2>Security findings are not optional</h2>
+      <p>A pipeline with unresolved critical or high severity security findings will not advance past the SAST or DAST stage. There are no exceptions without a documented and approved risk acceptance from the CISO office.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Release management</h2>
+
+    <h3>Release gate checklist</h3>
+    <p>A release cannot proceed to production until the release manager has confirmed all of the following:</p>
+    <ol>
+      <li>All CI pipeline stages have passed on the release branch with no bypasses</li>
+      <li>SAST and DAST scans show no critical or high severity findings</li>
+      <li>E2E tests pass on the staging environment against the build candidate</li>
+      <li>Accessibility scan shows zero WCAG 2.1 AA violations on all primary user journeys</li>
+      <li>A release note summarising changes, known risks, and rollback steps has been prepared and reviewed</li>
+      <li>Change Advisory Board (CAB) approval has been received for standard changes to production</li>
+      <li>On-call coverage is confirmed for the deployment window and for two hours following deployment</li>
+    </ol>
+
+    <h3>Approved deployment strategies</h3>
+    <p>Teams must use one of the following approved strategies for all production releases:</p>
+    <ul>
+      <li><strong>Blue-green deployment</strong> — maintain two identical production environments; route traffic to the new version after validation. Preferred for stateless web applications and APIs.</li>
+      <li><strong>Rolling deployment</strong> — gradually replace instances of the old version with the new version. Supported on Kubernetes and Azure Container Apps.</li>
+      <li><strong>Feature flags</strong> — deploy code to production in a dormant state and enable features incrementally via a flag management tool. Recommended for large or high-risk changes.</li>
+    </ul>
+    <p>Hotfixes to production follow an expedited process: a hotfix branch, peer review by at least one senior developer, a minimal pipeline run, and verbal CAB notification within one hour of deployment.</p>
+    <p>
+      <a class="goa-cta" href="/ti-quality-improvement">Next: Continuous improvement</a>
+    </p>
+  </div>
+</div>

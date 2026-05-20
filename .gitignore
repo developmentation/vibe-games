@@ -1,0 +1,27 @@
+node_modules/
+.env
+.env.local
+.env.production
+
+# Challenge-1: synthetic source images + per-applicant extraction artefacts
+challenge-1/generated/
+challenge-1/extracted/
+challenge-1/uploads/
+challenge-1/node_modules/
+
+# Challenge-2 / challenge-3 local artefacts
+challenge-2/generated/
+challenge-2/node_modules/
+challenge-3/generated/
+challenge-3/node_modules/
+
+# OS + editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs + tmp
+*.log
+tmp/

@@ -1,0 +1,95 @@
+{
+  "applicant_id": null,
+  "applicant_identity": {
+    "legal_first_name": null,
+    "legal_last_name": null,
+    "preferred_name": null,
+    "date_of_birth": null,
+    "age_years": null,
+    "sin": null,
+    "ahcip_number": null,
+    "alberta_id_number": null,
+    "driver_licence_number": null,
+    "passport_or_immig_document_number": null,
+    "phone": null,
+    "email": null
+  },
+  "residency_status": {
+    "current_address_line_1": null,
+    "current_address_city": null,
+    "current_address_province": null,
+    "current_address_postal": null,
+    "proof_of_residency_documents": [],
+    "currently_in_alberta": null,
+    "citizenship_status": null
+  },
+  "household": {
+    "marital_status": null,
+    "household_size": null,
+    "spouse_legal_name": null,
+    "spouse_sin": null,
+    "spouse_monthly_income_cad": null,
+    "dependent_children_count": null
+  },
+  "financial": {
+    "monthly_income_employment_cad": null,
+    "monthly_income_other_cad": null,
+    "annual_total_income_prev_year_cad": null,
+    "tax_year_assessed": null,
+    "chequing_balance_cad": null,
+    "savings_balance_cad": null,
+    "total_liquid_assets_cad": null,
+    "current_benefits": []
+  },
+  "medical": {
+    "primary_diagnosis": null,
+    "secondary_diagnoses": [],
+    "is_permanent_condition": null,
+    "prognosis_summary": null,
+    "functional_limitations": null,
+    "ability_to_work_assessment": null,
+    "treating_physician_name": null,
+    "treating_physician_cpsa_id": null,
+    "specialists_consulted": [],
+    "current_medications": [],
+    "abnormal_lab_findings": [],
+    "medical_report_part_a_present": null,
+    "medical_report_part_b_present": null
+  },
+  "expenses": {
+    "monthly_rent_cad": null,
+    "monthly_utilities_cad": null,
+    "out_of_pocket_medication_cad": null,
+    "assistive_device_costs_cad": null
+  },
+  "banking": {
+    "bank_name": null,
+    "transit_number": null,
+    "institution_number": null,
+    "account_number_mask": null,
+    "direct_deposit_form_signed": null
+  },
+  "consent": {
+    "consent_signed": null,
+    "consent_date": null,
+    "case_file_number": null
+  },
+  "eligibility_assessment": {
+    "age_check_passed": null,
+    "residency_check_passed": null,
+    "citizenship_check_passed": null,
+    "medical_check_passed": null,
+    "income_check_passed": null,
+    "assets_check_passed": null,
+    "missing_documents": [],
+    "gaps": [],
+    "recommended_action": null,
+    "reviewer_role_recommended": null
+  },
+  "_metadata": {
+    "extraction_started_at": null,
+    "extraction_completed_at": null,
+    "documents_processed": [],
+    "completeness_percentage": null
+  }
+}

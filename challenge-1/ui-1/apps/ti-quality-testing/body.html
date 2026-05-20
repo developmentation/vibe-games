@@ -1,0 +1,124 @@
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Testing requirements overview</h2>
+    <p>Automated testing is required for all TI-managed applications. Tests must be committed to the repository alongside the code they cover, and all test suites must pass before a merge to a protected branch is permitted.</p>
+    <div class="goa-callout goa--important">
+      <h2>Minimum coverage threshold</h2>
+      <p>All new or modified code must maintain at least <strong>80% unit test coverage on new lines</strong>. Projects below this threshold must have an approved remediation plan on file with the TI Quality team before the next sprint begins.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Types of testing</h2>
+
+    <h3>Unit testing</h3>
+    <p>Unit tests verify individual functions, methods, or components in isolation. They are the foundation of any test suite and must be written by the developer as part of the definition of done for every story.</p>
+    <ul>
+      <li>Test one logical behaviour per test case</li>
+      <li>Use mocks and stubs to isolate external dependencies (databases, APIs, file systems)</li>
+      <li>Tests must be deterministic — no reliance on external services, system time, or execution order</li>
+      <li>Name tests as behaviour specifications: <em>"should return an error when the input is empty"</em></li>
+    </ul>
+
+    <h3>Integration testing</h3>
+    <p>Integration tests verify that two or more components work correctly together. They are required when your application connects to a database, external API, or message queue.</p>
+    <ul>
+      <li>Run against a local or containerised version of the dependency — never against production</li>
+      <li>Cover the happy path and at least one error scenario per integration point</li>
+      <li>Integration tests may run in a separate CI stage and are permitted longer timeouts than unit tests</li>
+    </ul>
+
+    <h3>End-to-end (E2E) testing</h3>
+    <p>E2E tests simulate real user journeys through the application via a browser or API client. They are required for all public-facing web applications and critical internal business workflows.</p>
+    <ul>
+      <li>Cover all primary user journeys identified in the project requirements</li>
+      <li>Include at least one negative path (invalid input, authentication failure, network error)</li>
+      <li>E2E tests run in CI against the staging environment before every production deployment</li>
+    </ul>
+
+    <h3>Accessibility testing</h3>
+    <p>All web applications serving GoA employees or the public must meet <strong>WCAG 2.1 Level AA</strong>. Accessibility testing is required at two levels on every release:</p>
+    <ul>
+      <li><strong>Automated</strong> — run axe-core or an equivalent tool in your E2E suite on every page in the primary user journey</li>
+      <li><strong>Manual</strong> — keyboard navigation check, screen reader test (NVDA + Firefox), and colour contrast review before each release to production</li>
+    </ul>
+    <div class="goa-callout goa--important">
+      <h2>Accessibility is a release gate</h2>
+      <p>Accessibility failures are treated as critical defects. A release cannot proceed to production if any WCAG 2.1 AA violations are present in the primary user journey.</p>
+    </div>
+  </div>
+</div>
+
+<div class="goa-main-grid">
+  <div class="paragraph paragraph--type--text-block paragraph--view-mode--default goa-column-100-100-100">
+    <h2>Test-driven development (TDD)</h2>
+    <p>TDD is <strong>recommended</strong> for all new feature development and <strong>required</strong> for bug fixes. Writing the failing test first clarifies acceptance criteria and ensures the fix is verified before the PR is raised.</p>
+    <p>The TDD cycle:</p>
+    <ol>
+      <li><strong>Red</strong> — write a failing test that describes the expected behaviour</li>
+      <li><strong>Green</strong> — write the minimum code needed to make the test pass</li>
+      <li><strong>Refactor</strong> — clean up the implementation without breaking the test</li>
+    </ol>
+
+    <h2>Approved testing frameworks</h2>
+    <div class="goa-table tiq-testing-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Language / platform</th>
+            <th>Unit and integration</th>
+            <th>E2E and browser</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>JavaScript / TypeScript</td>
+            <td>Jest, Vitest</td>
+            <td>Playwright, Cypress</td>
+          </tr>
+          <tr>
+            <td>React / Angular</td>
+            <td>Testing Library + Jest</td>
+            <td>Playwright</td>
+          </tr>
+          <tr>
+            <td>Python</td>
+            <td>pytest</td>
+            <td>Playwright (Python)</td>
+          </tr>
+          <tr>
+            <td>.NET / C#</td>
+            <td>xUnit, NUnit</td>
+            <td>Playwright (.NET)</td>
+          </tr>
+          <tr>
+            <td>Java</td>
+            <td>JUnit 5, Mockito</td>
+            <td>Selenium, Playwright</td>
+          </tr>
+          <tr>
+            <td>Accessibility</td>
+            <td>axe-core</td>
+            <td>axe-playwright, axe-cypress</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Unapproved frameworks require a written justification and sign-off from the TI Quality team before they are used in a GoA project.</p>
+
+    <h2>CI pipeline test gates</h2>
+    <p>The following checks must all pass before a merge to <strong>develop</strong> or <strong>main</strong> is permitted:</p>
+    <ul>
+      <li>All unit tests pass with no failures or skips</li>
+      <li>Code coverage threshold (80% on new lines) is met and the coverage report is published</li>
+      <li>Integration tests pass (if applicable to the project)</li>
+      <li>No new accessibility violations from the automated axe-core scan</li>
+      <li>Linting and code formatting checks pass without errors</li>
+    </ul>
+    <p>
+      <a class="goa-cta" href="/ti-quality-devsecops">Next: DevSecOps &amp; release management</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,96 @@
+{
+  "reference_url": "https://www.alberta.ca/aish",
+  "fetched_at": "2026-05-12T04:38:51.358Z",
+  "css_bundles": [
+    "https://www.alberta.ca/sites/default/files/css/css_T7w9dx5gvG-nuOMcsCTX0GjsKrBoa1I7MMetoc9RSn4.css?delta=0&language=en&theme=goa_core&include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY",
+    "https://www.alberta.ca/sites/default/files/css/css_k993VS5og3M4FXQRX-mKgEAZzXhK3c7AziQMqTl5ouw.css?delta=1&language=en&theme=goa_core&include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY",
+    "https://www.alberta.ca/sites/default/files/css/css_sS7dz-mvJYB2BlWy6gYya0cwDFfrGKf-hoPlPZi4qvg.css?delta=2&language=en&theme=goa_core&include=eJxNyEEKAyEMQNELBT3SEE1wwkQjiU5pT1-YTbv5fF69mGSZHzKIxypq9cp_D9Wc8zDvqPJhaIbHQ02toMJEx-Y4z8jke6Kmn6Q95i4qcTJBvGNxzwWD4RZ-RX6autFW_gIm5TUY"
+  ],
+  "fonts": [],
+  "images": [
+    {
+      "from": "https://www.alberta.ca/core/misc/icons/e32700/error.svg",
+      "to": "images/img-1.svg"
+    },
+    {
+      "from": "https://www.alberta.ca/core/misc/icons/e29700/warning.svg",
+      "to": "images/img-2.svg"
+    },
+    {
+      "from": "https://www.alberta.ca/core/misc/icons/73b355/check.svg",
+      "to": "images/img-3.svg"
+    },
+    {
+      "from": "https://www.alberta.ca/core/misc/icons/787878/twistie-down.svg",
+      "to": "images/img-4.svg"
+    },
+    {
+      "from": "https://www.alberta.ca/core/misc/icons/787878/twistie-up.svg",
+      "to": "images/img-5.svg"
+    },
+    {
+      "from": "https://p.typekit.net/p.css?s=1&k=nur5yta&ht=tk&f=26036.26037.26044.26046.26047&a=14638192&app=typekit&e=css",
+      "to": "images/img-6.css"
+    },
+    {
+      "from": "https://use.typekit.net/af/3f7b4d/00000000000000003b9acb2d/27/l?subset_id=1&fvd=n4&v=3",
+      "to": "images/img-7.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/3f7b4d/00000000000000003b9acb2d/27/d?subset_id=1&fvd=n4&v=3",
+      "to": "images/img-8.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/3f7b4d/00000000000000003b9acb2d/27/a?subset_id=1&fvd=n4&v=3",
+      "to": "images/img-9.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/761912/00000000000000003b9acb2e/27/l?subset_id=1&fvd=i4&v=3",
+      "to": "images/img-10.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/761912/00000000000000003b9acb2e/27/d?subset_id=1&fvd=i4&v=3",
+      "to": "images/img-11.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/761912/00000000000000003b9acb2e/27/a?subset_id=1&fvd=i4&v=3",
+      "to": "images/img-12.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/ee7f3d/00000000000000003b9acb33/27/l?subset_id=1&fvd=n7&v=3",
+      "to": "images/img-13.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/ee7f3d/00000000000000003b9acb33/27/d?subset_id=1&fvd=n7&v=3",
+      "to": "images/img-14.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/ee7f3d/00000000000000003b9acb33/27/a?subset_id=1&fvd=n7&v=3",
+      "to": "images/img-15.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/503f80/00000000000000003b9acb34/27/l?subset_id=1&fvd=i7&v=3",
+      "to": "images/img-16.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/503f80/00000000000000003b9acb34/27/d?subset_id=1&fvd=i7&v=3",
+      "to": "images/img-17.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/503f80/00000000000000003b9acb34/27/a?subset_id=1&fvd=i7&v=3",
+      "to": "images/img-18.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/e60e87/00000000000000003b9acb31/27/l?subset_id=1&fvd=n6&v=3",
+      "to": "images/img-19.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/e60e87/00000000000000003b9acb31/27/d?subset_id=1&fvd=n6&v=3",
+      "to": "images/img-20.bin"
+    },
+    {
+      "from": "https://use.typekit.net/af/e60e87/00000000000000003b9acb31/27/a?subset_id=1&fvd=n6&v=3",
+      "to": "images/img-21.bin"
+    }
+  ]
+}

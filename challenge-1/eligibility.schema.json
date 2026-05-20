@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vibe-games.local/challenge-1/eligibility.schema.json",
+  "title": "AISH Application Eligibility",
+  "description": "Field-by-field eligibility profile for an Alberta AISH (Assured Income for the Severely Handicapped) applicant. Populated by an extraction agent from the document images in challenge_1.documents. Each field declares the source documents that can supply its value under x-sources.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "applicant_id",
+    "applicant_identity",
+    "residency_status",
+    "household",
+    "financial",
+    "medical",
+    "banking",
+    "consent",
+    "eligibility_assessment"
+  ],
+  "properties": {
+    "applicant_id": {
+      "type": "integer",
+      "description": "Foreign key into challenge_1.applicants.id",
+      "x-system": true
+    },
+    "applicant_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "legal_first_name":  { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Alberta Driver Licence (front)", "Canadian Birth Certificate", "AHCIP Card", "Citizenship or Immigration Document", "AISH Medical Report Part A (Applicant)"] },
+        "legal_last_name":   { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Alberta Driver Licence (front)", "Canadian Birth Certificate", "AHCIP Card", "Citizenship or Immigration Document"] },
+        "preferred_name":    { "type": ["string","null"], "x-sources": ["AISH Medical Report Part A (Applicant)"] },
+        "date_of_birth":     { "type": ["string","null"], "format": "date", "x-sources": ["Alberta Photo ID Card (front)", "Alberta Driver Licence (front)", "Canadian Birth Certificate", "AHCIP Card", "AISH Medical Report Part A (Applicant)", "AISH Medical Report Part B (Physician)"] },
+        "age_years":         { "type": ["integer","null"], "minimum": 0, "x-derived": ["applicant_identity.date_of_birth"] },
+        "sin":               { "type": ["string","null"], "pattern": "^\\d{3}-\\d{3}-\\d{3}$", "x-sources": ["CRA Notice of Assessment", "Pay Stub or Income Slip"] },
+        "ahcip_number":      { "type": ["string","null"], "x-sources": ["AHCIP Card"] },
+        "alberta_id_number": { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)"] },
+        "driver_licence_number": { "type": ["string","null"], "x-sources": ["Alberta Driver Licence (front)"] },
+        "passport_or_immig_document_number": { "type": ["string","null"], "x-sources": ["Citizenship or Immigration Document"] },
+        "phone":             { "type": ["string","null"], "x-sources": ["AISH Medical Report Part A (Applicant)", "Signed AISH Consent and Authorization Form"] },
+        "email":             { "type": ["string","null"], "x-sources": ["AISH Medical Report Part A (Applicant)", "Signed AISH Consent and Authorization Form"] }
+      }
+    },
+    "residency_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "current_address_line_1": { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Alberta Driver Licence (front)", "Utility Bill (electricity)", "Residential Lease Agreement (page 1)", "Bank Statement (chequing)"] },
+        "current_address_city":   { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Utility Bill (electricity)", "Residential Lease Agreement (page 1)"] },
+        "current_address_province": { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Utility Bill (electricity)", "Residential Lease Agreement (page 1)"] },
+        "current_address_postal": { "type": ["string","null"], "x-sources": ["Alberta Photo ID Card (front)", "Utility Bill (electricity)", "Residential Lease Agreement (page 1)"] },
+        "proof_of_residency_documents": { "type": "array", "items": { "type": "string" }, "x-sources": ["Utility Bill (electricity)", "Residential Lease Agreement (page 1)", "Bank Statement (chequing)"] },
+        "currently_in_alberta": { "type": ["boolean","null"], "x-derived": ["residency_status.current_address_province"] },
+        "citizenship_status":  { "type": ["string","null"], "enum": ["Canadian Citizen", "Permanent Resident", "Protected Person (Convention Refugee)", null], "x-sources": ["Citizenship or Immigration Document"] }
+      }
+    },
+    "household": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "marital_status":      { "type": ["string","null"], "enum": ["single","married","common_law","divorced","widowed","separated", null], "x-sources": ["AISH Medical Report Part A (Applicant)", "Spouse/Partner Financial Declaration"] },
+        "household_size":      { "type": ["integer","null"], "minimum": 1, "x-sources": ["AISH Medical Report Part A (Applicant)"] },
+        "spouse_legal_name":   { "type": ["string","null"], "x-sources": ["Spouse/Partner Financial Declaration"], "x-conditional": "partnered" },
+        "spouse_sin":          { "type": ["string","null"], "x-sources": ["Spouse/Partner Financial Declaration"], "x-conditional": "partnered" },
+        "spouse_monthly_income_cad": { "type": ["number","null"], "minimum": 0, "x-sources": ["Spouse/Partner Financial Declaration"], "x-conditional": "partnered" },
+        "dependent_children_count": { "type": ["integer","null"], "minimum": 0, "x-sources": ["AISH Medical Report Part A (Applicant)"] }
+      }
+    },
+    "financial": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "monthly_income_employment_cad": { "type": ["number","null"], "minimum": 0, "x-sources": ["Pay Stub or Income Slip"] },
+        "monthly_income_other_cad":      { "type": ["number","null"], "minimum": 0, "x-sources": ["CPP-D / EI Decision Letter", "Income Support Status Letter"] },
+        "annual_total_income_prev_year_cad": { "type": ["number","null"], "minimum": 0, "x-sources": ["CRA Notice of Assessment"] },
+        "tax_year_assessed":             { "type": ["integer","null"], "minimum": 2000, "x-sources": ["CRA Notice of Assessment"] },
+        "chequing_balance_cad":          { "type": ["number","null"], "minimum": 0, "x-sources": ["Bank Statement (chequing)"] },
+        "savings_balance_cad":           { "type": ["number","null"], "minimum": 0, "x-sources": ["Bank Statement (savings)"] },
+        "total_liquid_assets_cad":       { "type": ["number","null"], "minimum": 0, "x-derived": ["financial.chequing_balance_cad", "financial.savings_balance_cad"] },
+        "current_benefits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "program": { "type": "string", "enum": ["EI", "CPP-D", "Income Support", "AISH", "Other"] },
+              "monthly_cad": { "type": ["number","null"] },
+              "status": { "type": ["string","null"], "enum": ["approved","denied","pending","under_appeal", null] }
+            }
+          },
+          "x-sources": ["CPP-D / EI Decision Letter", "Income Support Status Letter"]
+        }
+      }
+    },
+    "medical": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primary_diagnosis":         { "type": ["string","null"], "x-sources": ["AISH Medical Report Part B (Physician)", "Specialist Consultation Report", "AISH Medical Report Part A (Applicant)"] },
+        "secondary_diagnoses":       { "type": "array", "items": { "type": "string" }, "x-sources": ["AISH Medical Report Part B (Physician)", "Specialist Consultation Report"] },
+        "is_permanent_condition":    { "type": ["boolean","null"], "x-sources": ["AISH Medical Report Part B (Physician)"] },
+        "prognosis_summary":         { "type": ["string","null"], "x-sources": ["AISH Medical Report Part B (Physician)", "Specialist Consultation Report"] },
+        "functional_limitations":    { "type": ["string","null"], "x-sources": ["AISH Medical Report Part A (Applicant)", "AISH Medical Report Part B (Physician)"] },
+        "ability_to_work_assessment":{ "type": ["string","null"], "enum": ["unable_to_work","limited_capacity","capable_with_supports", null], "x-sources": ["AISH Medical Report Part B (Physician)"] },
+        "treating_physician_name":   { "type": ["string","null"], "x-sources": ["AISH Medical Report Part B (Physician)", "Specialist Consultation Report"] },
+        "treating_physician_cpsa_id":{ "type": ["string","null"], "x-sources": ["AISH Medical Report Part B (Physician)"] },
+        "specialists_consulted":     { "type": "array", "items": { "type": "string" }, "x-sources": ["Specialist Consultation Report"] },
+        "current_medications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "drug_name": { "type": "string" },
+              "dosage": { "type": ["string","null"] },
+              "prescriber": { "type": ["string","null"] }
+            }
+          },
+          "x-sources": ["Pharmacy Prescription Record"]
+        },
+        "abnormal_lab_findings":     { "type": "array", "items": { "type": "string" }, "x-sources": ["Lab Results Page"] },
+        "medical_report_part_a_present": { "type": ["boolean","null"], "x-sources": ["AISH Medical Report Part A (Applicant)"] },
+        "medical_report_part_b_present": { "type": ["boolean","null"], "x-sources": ["AISH Medical Report Part B (Physician)"] }
+      }
+    },
+    "expenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "monthly_rent_cad":              { "type": ["number","null"], "minimum": 0, "x-sources": ["Residential Lease Agreement (page 1)"] },
+        "monthly_utilities_cad":         { "type": ["number","null"], "minimum": 0, "x-sources": ["Utility Bill (electricity)"] },
+        "out_of_pocket_medication_cad":  { "type": ["number","null"], "minimum": 0, "x-sources": ["Receipt for Medication"], "x-optional": true },
+        "assistive_device_costs_cad":    { "type": ["number","null"], "minimum": 0, "x-sources": ["Receipt for Assistive Device"], "x-optional": true }
+      }
+    },
+    "banking": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bank_name":                 { "type": ["string","null"], "x-sources": ["Bank Statement (chequing)", "Direct Deposit Authorization Form"] },
+        "transit_number":            { "type": ["string","null"], "x-sources": ["Direct Deposit Authorization Form"] },
+        "institution_number":        { "type": ["string","null"], "x-sources": ["Direct Deposit Authorization Form"] },
+        "account_number_mask":       { "type": ["string","null"], "x-sources": ["Bank Statement (chequing)", "Direct Deposit Authorization Form"] },
+        "direct_deposit_form_signed":{ "type": ["boolean","null"], "x-sources": ["Direct Deposit Authorization Form"] }
+      }
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "consent_signed":            { "type": ["boolean","null"], "x-sources": ["Signed AISH Consent and Authorization Form"] },
+        "consent_date":              { "type": ["string","null"], "format": "date", "x-sources": ["Signed AISH Consent and Authorization Form"] },
+        "case_file_number":          { "type": ["string","null"], "x-sources": ["Signed AISH Consent and Authorization Form", "CPP-D / EI Decision Letter", "Income Support Status Letter"] }
+      }
+    },
+    "eligibility_assessment": {
+      "type": "object",
+      "description": "Derived from the populated fields above.",
+      "additionalProperties": false,
+      "properties": {
+        "age_check_passed":          { "type": ["boolean","null"], "x-derived": ["applicant_identity.age_years"] },
+        "residency_check_passed":    { "type": ["boolean","null"], "x-derived": ["residency_status.current_address_province"] },
+        "citizenship_check_passed":  { "type": ["boolean","null"], "x-derived": ["residency_status.citizenship_status"] },
+        "medical_check_passed":      { "type": ["boolean","null"], "x-derived": ["medical.is_permanent_condition", "medical.ability_to_work_assessment"] },
+        "income_check_passed":       { "type": ["boolean","null"], "x-derived": ["financial.monthly_income_employment_cad"] },
+        "assets_check_passed":       { "type": ["boolean","null"], "x-derived": ["financial.total_liquid_assets_cad"] },
+        "missing_documents":         { "type": "array", "items": { "type": "string" } },
+        "gaps":                      { "type": "array", "items": { "type": "string" } },
+        "recommended_action":        { "type": ["string","null"], "enum": ["approve","request_more_info","deny","escalate", null] },
+        "reviewer_role_recommended": { "type": ["string","null"], "enum": ["intake_clerk","medical_reviewer","financial_reviewer","supervisor", null] }
+      }
+    },
+    "_metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "extraction_started_at":  { "type": ["string","null"], "format": "date-time" },
+        "extraction_completed_at":{ "type": ["string","null"], "format": "date-time" },
+        "documents_processed":    { "type": "array", "items": { "type": "string" } },
+        "completeness_percentage":{ "type": ["number","null"], "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

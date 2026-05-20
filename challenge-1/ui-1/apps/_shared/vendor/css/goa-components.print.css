@@ -1,0 +1,322 @@
+/* hidden ***/
+
+div.goa-locations div.goa-form,
+div.goa-locations [itemprop = 'image'],
+div.goa-locations [itemprop = 'priceRange'],
+div.goa-locations [itemprop = 'geo'],
+[itemprop='priceRange'], 
+[itemprop='image'],
+[itemprop='geo'], 
+div.goa-locations a.goa-cta,
+div.goa-card div.goa-thumb iframe,
+div.goa-search div.goa-searchbar,
+div.goa-search div.goa-paging,
+div.goa-search div.goa-searchministry,
+div.goa-accordion div.goa-toolbar,
+.ab-c-location-footer > button, 
+div.goa-gallery--navigation, 
+div.goa-gallery--controls, 
+div.goa-gallery--instructions,
+a.goa-link-button--escape,
+.goa-pagemenu-wrapper,
+.goa-login,
+.goa-pagemenu-toc-wrapper,
+button.goa-section-menu--links,
+button.goa-togglesection-close,
+.goa-section-menu,
+.goa-parent-link > a,
+.goa-section-menu > a,
+.goa-feedback-wrapper,
+button[name='buttonSubmit'],
+.recaptcha,
+.goa-disclaimer > button.goa-show-more-link.goa-button--readmore {
+	display: none;
+}
+
+/* general ***/
+
+div.goa-title {
+	font-size: 1.5em;
+	font-weight: 700;
+}
+
+/* goa-parent-link - goa-section ****/
+
+.goa-forms-documents > ul {
+	list-style-type: none;
+	padding: 0
+}
+
+/* goa-accordion ***/
+
+div.goa-accordion h3.goa-title button {
+	background: transparent;
+	border: none;
+	line-height: 2rem;
+    font-size: 1.5rem;
+	font-weight: 700;
+	margin: 0 0 1rem;
+	padding: 0;
+}
+
+div.goa-accordion > ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-accordion > ul > li {
+	margin: 28px 0 0;
+}
+div.goa-accordion > ul > li > div.goa-title {
+	padding: 12px;
+	border: 1px solid #000;
+	font-weight: 700;
+}
+
+/* goa-biographies ***/
+
+div.goa-biography > ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-biography > ul > li {
+	margin: 28px 0 0;
+
+}
+div.goa-biography > ul > li > div.goa-title {
+	font-weight: 700;
+}
+div.goa-biography > ul > li > div.goa-thumb {
+	margin: 28px 0 0;
+}
+div.goa-biography > ul > li > div.goa-thumb img {
+	width: 33%;
+}
+
+/* goa-callouts **/
+
+div.goa-callout {
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+	width: 100%;
+	margin: 24px 0 0;
+	padding: 24px;
+	border-color: #002B49;
+	border-width: 0;
+	border-left-width: 10px;
+	border-style: solid;
+}
+
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) {
+	padding-right: 0;
+	padding-top: 12px;
+	padding-bottom: 12px;
+}
+
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) > * {
+	font-size: 1.5rem;
+	line-height: 2rem;
+	font-weight: 700;
+	color: #002B49;
+}
+
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) a {
+	color: #0070c4;
+}
+
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) a:hover,
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) a:focus {
+	color: #000000;
+}
+
+div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error) a[target = '_blank']:after {
+    margin: 0px 5px -1px 6px;
+}
+
+div[class *= "goa-column"] div.goa-callout:not(.goa--event):not(.goa--success):not(.goa--important):not(.goa--emergency):not(.goa--error):first-child {
+	margin: 0;
+}
+
+div.goa-callout.goa--event,
+div.goa-callout.goa--success,
+div.goa-callout.goa--important,
+div.goa-callout.goa--emergency,
+div.goa-callout.goa--error {
+	background: #f1f1f1;
+	border-left-width: 48px;
+}
+
+div.goa-callout.goa-callout--expand {
+	padding-bottom: 0;
+}
+
+div.goa-callout .hidden {
+	display: none;
+}
+
+div.goa-callout *:first-child:not([name]),
+div.goa-callout *:first-child[name] + * {
+	margin-top: 0;
+}
+
+div.goa-callout > *:last-child {
+	display: inline-block;
+}
+
+div.goa-callout > a.goa-cta,
+div.goa-callout > button.goa-button {
+	margin-top: 24px;
+}
+
+div.goa-callout > span > *:last-child,
+div.goa-callout > *:last-child {
+	margin-bottom: 0;
+}
+
+div.goa-callout > ul > li > ul:first-child:not([name]) {
+	margin-top: 18px;
+}
+
+.goa-callout .goa-callout:before {
+	content: none;
+}
+
+.goa-callout > div.goa-callout {
+	padding: 0 0 0 1px;
+	border-left-width: 0;
+	background: transparent;
+	border: 0;
+	margin-bottom: 0;
+}
+
+/* goa-caption ***/
+
+div.goa-caption {
+	padding: 12px;
+	border: 1px solid #000;
+}
+
+/* goa-card ***/
+
+div.goa-card ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-card li {
+	margin: 28px 0 0;
+}
+div.goa-card img {
+	width: 33%;
+}
+div.goa-card div.goa-title {
+	margin: 28px 0 0;
+}
+div.goa-card div.goa-text {
+	margin: 28px 0 0;
+}
+
+/* goa-disclaimer ***/
+
+div.goa-disclaimer {
+	margin: 28px 0 0;
+	padding: 12px;
+	border: 1px solid #000;
+}
+
+/* goa-form ***/
+
+div.goa-form div.goa-field {
+	margin: 28px 0 0;
+}
+div.goa-form div.goa-field input:not([type = 'checkbox']):not([type = 'radio']),
+div.goa-form div.goa-field select,
+div.goa-form div.goa-field textarea {
+	width: 100%;
+	padding: 4px  8px;
+}
+
+div.goa-form div.goa-field input:not([type = 'checkbox']):not([type = 'radio']) {
+	border: none;
+	border-bottom: 1px solid #919191;
+}
+
+div.goa-form div.recaptcha {
+	margin: 28px 0 0;
+}
+div.goa-form div.goa-buttons {
+	margin: 28px 0 0;
+}
+
+div.goa-disclaimer {
+	padding: 0;
+	border: none;
+	font-size: 0.875rem;
+    line-height: 1.313rem;
+}
+
+/* goa-image ***/
+
+div.goa-image {
+	width: 40%;
+	vertical-align: top;
+}
+div.goa-image img {
+	width: 100%;
+	vertical-align: top;
+}
+div.goa-image.goa--left {
+	float: left;
+	margin: 24px 24px 24px 0;
+}
+div.goa-image.goa--right {
+	float: right;
+	margin: 24px 0 24px 24px;
+}
+
+/* goa-locations ***/
+
+div.goa-locations > div.goa-map {
+    height: 400px;
+}
+div.goa-locations > div.filterText {
+	margin: 28px 0 0;
+}
+
+/* goa-publications ***/
+
+div.goa-publications {
+
+}
+div.goa-publications > ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+div.goa-publications > ul > li {
+	margin: 28px 0 0;
+}
+div.goa-publications > ul > li > div.goa-title {
+	margin: 28px 0 0;
+}
+div.goa-publications > ul > li > div.goa-thumb img {
+	width: 33%;
+}
+
+/* goa-table ***/
+
+div.goa-table {
+	margin: 28px 0 0;
+}
+div.goa-table table {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid #000;
+}
+div.goa-table th, div.goa-table td {
+	padding: 8px;
+	border-collapse: collapse;
+	border: 1px solid #000;
+}

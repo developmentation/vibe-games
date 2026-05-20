@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vibe Games &middot; Challenge 1 &middot; AISH Intake</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+      html, body { height: 100%; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <div id="app" class="min-h-screen flex flex-col">
+      <header class="border-b bg-white">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-500">Vibe Games &middot; Challenge 1</div>
+            <h1 class="text-xl font-bold text-slate-900">AISH Application Intake</h1>
+          </div>
+          <div class="text-xs text-slate-500" v-if="health">
+            <div>service {{ health.status }}</div>
+            <div>active UI: {{ health.active_ui }}</div>
+            <div>up {{ health.uptime_seconds }}s</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1">
+        <div class="max-w-5xl mx-auto px-6 py-10">
+          <div class="rounded-2xl bg-white border border-slate-200 p-8 shadow-sm">
+            <h2 class="text-lg font-semibold mb-2">Placeholder deploy</h2>
+            <p class="text-sm text-slate-600 mb-4">
+              The Render web service is live. The intake demo (drag-and-drop file upload,
+              FormKit panel bound to the AISH eligibility schema, SSE stream of per-image
+              extraction progress, and the Submit + Generate Instructions actions) lands
+              here once <code>PROMPT.md</code> is executed.
+            </p>
+            <p class="text-sm text-slate-600">
+              The schema is already served. Inspect it from your shell or by clicking the
+              link below.
+            </p>
+            <div class="mt-6 flex gap-3 flex-wrap">
+              <a class="px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm" href="/api/health">/api/health</a>
+              <a class="px-3 py-1.5 rounded-md bg-slate-200 text-slate-900 text-sm" href="/api/schema">/api/schema</a>
+            </div>
+          </div>
+
+          <div class="mt-8 grid sm:grid-cols-3 gap-4 text-sm">
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+              <div class="font-semibold text-slate-700">ui-1</div>
+              <div class="text-slate-500">Intake demo (this page). Drag-and-drop documents, watch the form populate.</div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+              <div class="font-semibold text-slate-700">ui-2</div>
+              <div class="text-slate-500">Case-review console. Lists cases, approval flow, AI chat for correspondence.</div>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-white p-4">
+              <div class="font-semibold text-slate-700">ui-3</div>
+              <div class="text-slate-500">Reserved. Analytics or applicant-facing portal candidate.</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="border-t bg-white">
+        <div class="max-w-5xl mx-auto px-6 py-4 text-xs text-slate-500">
+          Vibe Games hackathon prep. See <code>challenge-1/PROMPT.md</code> for the build contract.
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+      createApp({
+        setup() {
+          const health = ref(null);
+          onMounted(async () => {
+            try {
+              const r = await axios.get('/api/health');
+              health.value = r.data;
+            } catch (e) {
+              health.value = { status: 'unreachable' };
+            }
+          });
+          return { health };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

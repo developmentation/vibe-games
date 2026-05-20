@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Claude Build Harness: Visual Instruction Manual</title>
+<meta name="description" content="The Claude Build Harness: 8-phase build lifecycle + build framework (template + guides + standards + security frameworks), fully integrated for Claude Code." />
+
+<!-- Google Fonts: Inter (UI) + JetBrains Mono (code) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Tailwind CDN (Play CDN: fine for static documents) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Vue 3 CDN -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+<style>
+  :root {
+    --discovery: #2563eb;  /* blue-600 */
+    --build:     #059669;  /* emerald-600 */
+    --verify:    #d97706;  /* amber-600 */
+    --ship:      #7c3aed;  /* violet-600 */
+    --general:   #475569;  /* slate-600 */
+  }
+  html, body { font-family: 'Inter', system-ui, sans-serif; background: #fafafa; color: #0f172a; }
+  code, pre, .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .step-discovery { stroke: var(--discovery); fill: #eff6ff; }
+  .step-build     { stroke: var(--build);     fill: #ecfdf5; }
+  .step-verify    { stroke: var(--verify);    fill: #fffbeb; }
+  .step-ship      { stroke: var(--ship);      fill: #faf5ff; }
+  .badge-discovery { background: #dbeafe; color: var(--discovery); }
+  .badge-build     { background: #d1fae5; color: var(--build); }
+  .badge-verify    { background: #fef3c7; color: var(--verify); }
+  .badge-ship      { background: #ede9fe; color: var(--ship); }
+  .badge-general   { background: #e2e8f0; color: var(--general); }
+  .ring-discovery { box-shadow: 0 0 0 1px #bfdbfe; }
+  .ring-build     { box-shadow: 0 0 0 1px #a7f3d0; }
+  .ring-verify    { box-shadow: 0 0 0 1px #fde68a; }
+  .ring-ship      { box-shadow: 0 0 0 1px #ddd6fe; }
+  .ring-general   { box-shadow: 0 0 0 1px #cbd5e1; }
+  .anchor-target  { scroll-margin-top: 5rem; }
+  details > summary { cursor: pointer; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+</style>
+</head>
+<body class="antialiased">
+
+<!--
+  The harness data below is the single source of truth for everything rendered
+  on this page. To add a new skill, standard, guide, or reference, edit the
+  matching array in harnessData. The page re-renders without a build step.
+
+  An AI agent reading this HTML can extract the harness inventory directly from
+  the harnessData object: semantic HTML mirrors it section by section.
+-->
+
+<div id="app"></div>
+
+<script>
+const harnessData = {
+  meta: {
+    title: "Claude Build Harness",
+    tagline: "The 8-phase build lifecycle + build framework, fully integrated for Claude Code.",
+    description: "This harness is a reusable Claude Code workspace designed to run unchanged across many projects. It is opinionated about the technology stack (Vue 3 frontend + Node.js / Express backend as first-class, Go / Chi as a second-class option) but generic about the project. Nothing in the skills, gates, or template is specific to any particular module; every check derives its facts at runtime from requirements.md / router / migrations / scan output. Open it in Claude Code and every skill, hook, guide, standard, and template loads automatically. It bundles an 8-phase local-file lifecycle (phase1-requirements → phase8-deployment), a production-tested template, sequential build guides, cross-cutting standards, and four review frameworks (blueteam defensive, redteam offensive, greenteam code review, yellowteam AI-smell prose).",
+    audience: [
+      { who: "Layperson", why: "Skim the flowchart and skill cards to understand what the system does and why it has 8 phases." },
+      { who: "AI expert", why: "Drill into the methodology refs and validation framework to evaluate rigor and adapt the patterns." },
+      { who: "Claude itself", why: "The harnessData JSON above and the semantic HTML below give Claude a complete inventory and the rules for extending it." }
+    ],
+    rules: [
+      { rule: "Template first",           detail: "Always copy from ./template/ via /build; never scaffold by hand." },
+      { rule: "Guides are sequential",    detail: "01-08 backend, 01-12 frontend: load them in order." },
+      { rule: "Standards are cross-cutting", detail: "Re-check standards after each feature, not just at start." },
+      { rule: "Hard-block on missing prior deliverables", detail: "A phase refuses to proceed if its required upstream artifact is missing: print an error and exit non-zero." },
+      { rule: "Maintain documentation",   detail: "Run /sync-docs after every feature; CI runs the same on every push." },
+      { rule: "Security scans are mandatory", detail: "AI analysis alone is insufficient: run the deterministic blueteam + redteam + greenteam + yellowteam scripts." },
+      { rule: "Parameterized SQL only. httpOnly cookies only.", detail: "No exceptions." },
+      { rule: "Migrations are idempotent, tracked, auto-run", detail: "NNN_*.sql files only. Every statement uses IF NOT EXISTS / ON CONFLICT. Runner fires on every build AND every release." },
+      { rule: "No silent deferrals", detail: "Must-have FR/NFR cannot be marked complete without code evidence. Scope cuts require formal downgrade in requirements.md + re-plan via /phase2-planning. check-fr-coverage.mjs + check-nfr-coverage.mjs + check-no-silent-deferral.mjs mechanically block advancing if any must-have lacks code OR any 'deferred' phrase in a phase report lacks a paper trail." },
+      { rule: "All gates mechanical, not aspirational", detail: "Every 'must do X' has a script that exits non-zero if X didn't happen. check-step-gates.mjs runs before each phase advance; failures block the move. Evals are the harness's truth-telling layer: see #evals for the full matrix and the philosophy that gaps mean better evals, not just retries." },
+      { rule: "Nav completeness: no orphan pages", detail: "Every public-facing FR must be reachable from / via visible nav links in ≤2 clicks. check-nav-completeness.mjs parses the router + layout components + landing page; any FR-cited public route not in nav fails the gate. phase3-architecture's IA section (check-ia-section.mjs) is the upstream half: sitemap defined first, wiring verified after." },
+      { rule: "Blueteam pipeline is all-or-nothing", detail: "/phase5-development and /phase8-deployment must complete the full security pipeline: scan + HTML overview + risk-acceptance file + validate_reports.js. check-blueteam-pipeline.mjs blocks if any stage is missing. Findings without explicit RA-NNN entries count as unaddressed." },
+      { rule: "Evidence strength beats config presence", detail: "An NFR is not 'covered' because lighthouserc.json or vue-i18n exists. check-evidence-strength.mjs verifies actual exercise: a Lighthouse run output, locale files PLUS $t() call sites, axe invocation, logger call sites. Config without measurement is not evidence." }
+    ]
+  },
+
+  phaseSkills: [
+    { n: 1, id: "phase1-requirements", slash: "/phase1-requirements", phase: "discovery",
+      purpose: "Read project briefs, RFPs, and user stories from the local inputs directory, classify them, extract stakeholders/objectives/constraints, and produce a structured requirements document with FRs (MoSCoW), NFRs, and module decomposition.",
+      inputs: ["./phases/phase1-requirements/inputs/ (briefs, RFPs, transcripts, user stories)"],
+      requires: [],
+      output: "requirements.md", outputPath: "phases/phase1-requirements/output/requirements.md",
+      methodology: ".claude/skills/phase1-requirements/methodology.md",
+      template: ".claude/skills/phase1-requirements/output-template.md" },
+    { n: 2, id: "phase2-planning", slash: "/phase2-planning", phase: "discovery",
+      purpose: "Decompose requirements into 0.5-3d tasks; classify owner profile (ai/human/paired); wire dependencies; group into milestones; identify the critical path; map every NFR to at least one task.",
+      inputs: ["./phases/phase1-requirements/output/requirements.md"],
+      requires: ["phase1-requirements"],
+      output: "plan.md", outputPath: "phases/phase2-planning/output/plan.md",
+      methodology: ".claude/skills/phase2-planning/methodology.md",
+      template: ".claude/skills/phase2-planning/output-template.md" },
+    { n: 3, id: "phase3-architecture", slash: "/phase3-architecture", phase: "discovery",
+      purpose: "Produce the technical design: components, data model (ERD), API contract sketch, auth flow, deployment topology, tech stack (aligned with template/), ADRs, NFR-to-component mapping, STRIDE-lite threat model.",
+      inputs: ["./phases/phase1-requirements/output/requirements.md", "./phases/phase2-planning/output/plan.md"],
+      requires: ["phase1-requirements", "phase2-planning"],
+      output: "architecture.md + ADRs", outputPath: "phases/phase3-architecture/output/",
+      methodology: ".claude/skills/phase3-architecture/methodology.md",
+      template: ".claude/skills/phase3-architecture/output-template.md" },
+    { n: 4, id: "phase4-prototyping", slash: "/phase4-prototyping", phase: "build",
+      purpose: "Build the riskiest end-to-end slice (the tracer bullet) to validate the architecture's headline assumptions before committing the whole plan to them. Document validations, falsifications, performance baseline, mock inventory, and proposed architecture revisions.",
+      inputs: ["./phases/phase3-architecture/output/architecture.md (riskiest path identified in §6 Handoff)", "ADR files"],
+      requires: ["phase3-architecture"],
+      output: "prototype-report.md + working slice in repo",
+      outputPath: "phases/phase4-prototyping/output/",
+      methodology: ".claude/skills/phase4-prototyping/methodology.md",
+      template: ".claude/skills/phase4-prototyping/output-template.md" },
+    { n: 5, id: "phase5-development", slash: "/phase5-development", phase: "build",
+      purpose: "Build production code. HARD-BLOCKS if ./app/ isn't scaffolded by /build first (template-first, never by hand). Executes plan milestones in order, follows guides 01-08, applies all standards continuously, runs /sync-docs after every feature, runs /blueteam before declaring done. Tests + a11y + performance gates are part of complete.",
+      inputs: ["./phases/phase3-architecture/output/architecture.md", "./phases/phase2-planning/output/plan.md (milestones)", "./app/ scaffolded by /build", "./phases/phase4-prototyping/output/prototype-report.md (mock inventory)"],
+      requires: ["phase3-architecture", "build"],
+      output: "code in ./app/ + development-report.md",
+      outputPath: "phases/phase5-development/output/",
+      methodology: ".claude/skills/phase5-development/methodology.md",
+      template: ".claude/skills/phase5-development/output-template.md" },
+    { n: 6, id: "phase6-user-testing", slash: "/phase6-user-testing", phase: "verify",
+      purpose: "Two-phase validation. Phase A generates test-plan.md + step-by-step manual test scripts committed to app/test/manual/ + a comprehensive Playwright E2E suite in app/test/e2e/ covering every FR's acceptance criteria + a11y (axe) and perf (lighthouse) automation. Phase B ingests human session notes, runs the suite, classifies issues by severity (Critical/Major/Minor), and decides advance to /phase7-user-acceptance vs send-back to /phase5-development.",
+      inputs: ["./app/ built + ./phases/phase1-requirements/output/requirements.md", "Phase B also: human session notes"],
+      requires: ["phase5-development"],
+      output: "Phase A: test-plan.md + manual scripts + automated suite (committed). Phase B: test-results.md",
+      outputPath: "phases/phase6-user-testing/output/",
+      methodology: ".claude/skills/phase6-user-testing/methodology.md",
+      template: ".claude/skills/phase6-user-testing/output-template.md (+ output-template-results.md for Phase B)" },
+    { n: 7, id: "phase7-user-acceptance", slash: "/phase7-user-acceptance", phase: "verify",
+      purpose: "Two-phase stakeholder sign-off. Phase A generates uat-script.md (FR-by-FR pass/fail checklist + 30-60 min demo prep + deferral backlog + sign-off roster). Phase B captures stakeholder decisions into sign-off.md with explicit conditions becoming /phase8-deployment prerequisites.",
+      inputs: ["./phases/phase6-user-testing/output/test-results.md (no Criticals, no send-back decision)", "Phase B also: stakeholder UAT outcomes"],
+      requires: ["phase6-user-testing"],
+      output: "Phase A: uat-script.md. Phase B: sign-off.md",
+      outputPath: "phases/phase7-user-acceptance/output/",
+      methodology: ".claude/skills/phase7-user-acceptance/methodology.md",
+      template: ".claude/skills/phase7-user-acceptance/output-template.md (+ output-template-signoff.md for Phase B)" },
+    { n: 8, id: "phase8-deployment", slash: "/phase8-deployment", phase: "ship",
+      purpose: "Ship to production. Probes for Nexus (gcloud + GCP project): if available, deploys to GCP Cloud Run with migrations as a one-shot Cloud Run job. If not, builds local Docker image, runs migrations, launches locally, and prepares a handoff tarball for a human to push to real prod. Both paths run idempotent migrations as part of release (rule #8), execute the pre-deploy gate (sync-docs zero-drift, blueteam zero-criticals, idempotency proof, secret inventory, health probe), smoke-test, and document rollback.",
+      inputs: ["./phases/phase7-user-acceptance/output/sign-off.md (all approvals, conditions satisfied)", "./app/ built + migrations/ tracked"],
+      requires: ["phase7-user-acceptance"],
+      output: "runbook.md + release-notes.md + (cloud-run-state.json | handoff.tar.gz)",
+      outputPath: "phases/phase8-deployment/output/",
+      methodology: ".claude/skills/phase8-deployment/methodology.md",
+      template: ".claude/skills/phase8-deployment/output-template.md (+ output-template-release.md for release notes)" }
+  ],
+
+  evaluations: [
+    { id: "validate-step-output", name: "Output template structure",
+      script: ".claude/scripts/validate-step-output.mjs",
+      fires: ["phase1","phase2","phase3","phase4","phase5","phase6","phase7","phase8"],
+      surfaces: "Missing required sections, missing required tables, missing required mermaid diagrams in any phase's .md output.",
+      flexibility: "Tighten by adding REQUIRED:/TABLE:/MERMAID: lines to a phase's output-template.md. Loosen by removing them. Per-skill template files keep evals project-shapeable." },
+    { id: "check-external-deps", name: "External-dependency confirmation",
+      script: ".claude/scripts/check-external-deps.mjs",
+      fires: ["phase1","phase2"],
+      surfaces: "External dependencies that block must-have FRs but haven't been confirmed (a tenant that wasn't provisioned, an API key the sponsor forgot to issue, an account that was never allocated). Forces these to surface at /phase1-requirements instead of as a /phase5-development surprise.",
+      flexibility: "Adjust the accepted Status values (the script already accepts `confirmed` and `confirmed-as-deferrable`). Add columns to the External Dependencies table for project-specific tracking (e.g., a Linear ticket ID column)." },
+    { id: "check-fr-coverage", name: "FR coverage",
+      script: ".claude/scripts/check-fr-coverage.mjs",
+      fires: ["phase5","phase7","phase8"],
+      surfaces: "Every must-have FR must have a code citation in app/. Doc-only mentions (the dev-report claiming 'complete') don't count.",
+      flexibility: "Adjust the must-vs-should threshold per project. Weight heavier toward 'doc-only' for documentation-heavy work where prose IS the deliverable." },
+    { id: "check-nfr-coverage", name: "NFR coverage",
+      script: ".claude/scripts/check-nfr-coverage.mjs",
+      fires: ["phase5","phase7","phase8"],
+      surfaces: "NFRs without implementation evidence per category: PWA manifest, axe dep, structured logger, idempotent migrations, etc.",
+      flexibility: "Per-category checks are tunable. Building a CLI tool? Skip NFR-PWA. Building a backend service? Skip nav-related. Mark a category 'manual-verify' to acknowledge process NFRs." },
+    { id: "check-evidence-strength", name: "Evidence strength",
+      script: ".claude/scripts/check-evidence-strength.mjs",
+      fires: ["phase5","phase7","phase8"],
+      surfaces: "Deps/configs that exist but aren't exercised: lighthouserc with no run, locales with no $t() calls, axe dep with no AxeBuilder invocation, logger imported but never called.",
+      flexibility: "Add new categories per stack. SAST scan output? Performance benchmark CSV? Bundle-size report? The pattern is always: presence + actual call site." },
+    { id: "check-nav-completeness", name: "Nav completeness",
+      script: ".claude/scripts/check-nav-completeness.mjs",
+      fires: ["phase5","phase6","phase7","phase8"],
+      surfaces: "Public-facing routes in the router that have NO nav-link from /: orphan pages users cannot discover.",
+      flexibility: "Skip for non-UI projects (CLI, backend service). For multi-portal apps, override via per-portal nav source files. The eval reads the router + layout + landing-page; swap any of those for project-specific equivalents." },
+    { id: "check-test-presence", name: "Test presence + traceability",
+      script: ".claude/scripts/check-test-presence.mjs",
+      fires: ["phase5","phase6","phase8"],
+      surfaces: "Empty test stubs, e2e specs that don't cite any FR-NNN ID, missing unit tests, test files with no expect/assert/it/test calls.",
+      flexibility: "Adjust assertion regex per framework (Vitest, Jest, Playwright, Go testing). Add stack-specific signatures (e.g., Go's testing.T.Run pattern, Rust's #[test])." },
+    { id: "check-blueteam-pipeline", name: "Blueteam pipeline complete",
+      script: ".claude/scripts/check-blueteam-pipeline.mjs",
+      fires: ["phase5","phase8"],
+      surfaces: "Scan ran but the HTML overview / RA file / validate_reports.js stages were skipped. Critical findings without an RA-NNN risk-acceptance pairing.",
+      flexibility: "Skip for offline-only or research tools where exposure is minimal. Tighten by zero-Critical AND zero-High requirement for highly regulated projects. RA file shape can extend to per-rule blanket entries." },
+    { id: "check-ia-section", name: "Information Architecture",
+      script: ".claude/scripts/check-ia-section.mjs",
+      fires: ["phase3"],
+      surfaces: "phase3 architecture.md missing the IA section, sitemap, or nav-wiring table: root cause of orphan-page bugs at phase5.",
+      flexibility: "Skip for non-UI projects. Tighten by requiring a mermaid sitemap diagram in addition to the table. Add an explicit click-depth column for accessibility-sensitive apps." },
+    { id: "check-no-silent-deferral", name: "No silent deferrals",
+      script: ".claude/scripts/check-no-silent-deferral.mjs",
+      fires: ["phase5","phase6","phase7","phase8"],
+      surfaces: "Phase reports use 'deferred' / 'follow-up' / 'post-launch' near must/should requirements without paper trail (replan, phase8 prereq, or RA entry).",
+      flexibility: "Adjust the deferral-language regex per documentation style. Relax for research/spike projects where deferrals are inherent to the work: but accompany with explicit annotation." },
+    { id: "check-migration-idempotency", name: "Migration idempotency",
+      script: ".claude/scripts/check-migration-idempotency.mjs",
+      fires: ["phase5","phase8"],
+      surfaces: "Migrations whose second application changes schema state: empirically tested by spinning up a scratch Postgres in Docker and snapshotting before/after.",
+      flexibility: "Skip for DB-less projects. Add per-engine variants (MySQL, SQLite, MongoDB) by parameterising the container image and snapshot query." },
+    { id: "sync-docs", name: "Doc drift",
+      script: ".claude/skills/sync-docs/check-docs-sync.mjs",
+      fires: ["phase5","phase8"],
+      surfaces: "Drift between README ↔ openapi.yaml ↔ CLAUDE.md ↔ migrations ↔ Express routes: e.g., a new route that never landed in openapi.yaml.",
+      flexibility: "Override the rules file for non-Express stacks. Add new artifact pairs (e.g., GraphQL schema ↔ resolver coverage)." }
+  ],
+
+  generalSkills: [
+    { id: "build", slash: "/build",
+      purpose: "Scaffold from template/ into ./app/. Copies the chosen template, strips unused parts, then follows the build guides in order. Used by /phase5-development and standalone.",
+      use: "Before /phase5-development; or any time you need to scaffold a new app from the template",
+      args: ["frontend", "backend", "fullstack"] },
+    { id: "sync-docs", slash: "/sync-docs",
+      purpose: "Drift audit across README ↔ openapi.yaml ↔ CLAUDE.md ↔ migrations ↔ Express routes. Auto-discovers what exists, runs only applicable checks, proposes targeted patches. Zero npm dependencies.",
+      use: "After every feature; CI runs it on every push" },
+    { id: "blueteam", slash: "/blueteam",
+      purpose: "Defensive security assessment: OWASP ASVS Level 2 (14 chapters), CAS compliance (generic Cybersecurity Architecture Standard), STRIDE threat model, kill-chain aggregation, mandatory deterministic scans (npm audit, secretlint, ESLint+TypeScript security), security unit tests, DR resilience review, code-fix generation, HTML overview report.",
+      use: "After core features land; before each release",
+      reference: ".claude/references/security-blueteam.md",
+      backing: ".claude/security/blueteam/" },
+    { id: "redteam", slash: "/redteam",
+      purpose: "Offensive security testing: recon (10 JS tools with binary→Node-native dispatch on Windows + Linux + macOS), code analysis, PoC exploitation, remediation recommendations. Pipeline orchestrator (pipeline/claude_sdk.js) runs the 4 agents via the Anthropic Agent SDK with JSON-fence extraction so deliverables are valid JSON. Includes wrappers for Semgrep / TruffleHog / OSV-Scanner / ZAP.",
+      use: "After /blueteam clears critical findings; for adversarial validation",
+      reference: ".claude/references/security-redteam.md",
+      backing: ".claude/security/redteam/" },
+    { id: "greenteam", slash: "/greenteam",
+      purpose: "Multi-round deterministic code review: Round 1 (static + dependency hygiene): npm audit, secret scan, dangerous patterns, licence audit, depcheck, madge, prettier, govulncheck, redocly, gitignore, env defaults, migration sequence, compiled binaries, API baseURL audit, Go toolchain, ESLint config audit. Round 2 (test execution + CI + runtime + refinement): vue-tsc with --skipLibCheck, ESLint, vitest --coverage.reportOnFailure, go test -cover, integration enumeration, test-bypass audit, CI pipeline gap audit, console.log scan. Refinement pass re-frames findings (build-tag-fenced bypass downgrades coverage findings to LOW with status: by-design). Modeled on real human-led reviews.",
+      use: "Before partner reviews, milestone signoffs, release gates",
+      reference: ".claude/references/security-greenteam.md",
+      backing: ".claude/security/greenteam/" },
+    { id: "yellowteam", slash: "/yellowteam",
+      purpose: "Deterministic 12-rule AI-smell audit. Per-rule scanners for Not-X-but-Y constructions, em dashes, rhetorical tetracolons, cinematic short-sentence runs, rhetorical anchors, banned vocabulary, three-item flourishes, participial tails, ensure-hedges, vague intensifiers, decorations/emojis, and AI smell. Produces an AI Smells Report (JSON + MD + HTML) with per-file findings, severity, offending quote, and concrete rewrite.",
+      use: "Before publishing user-facing prose; periodic codebase audits",
+      reference: ".claude/references/security-yellowteam.md",
+      backing: ".claude/security/yellowteam/" },
+    { id: "style-guide", slash: "/style-guide",
+      purpose: "Single-file ad-hoc style check against the writing style guide. Lighter-weight than /yellowteam: good for an interactive 'check this draft' use; yellowteam is the batch framework with deliverable folders.",
+      use: "Quick check on a draft or single document" }
+  ],
+
+  standards: [
+    { id: "01-architecture", name: "Architecture", scope: "Monorepo layout, layer separation, health checks" },
+    { id: "02-security", name: "Security", scope: "OWASP ASVS L2, JWT, CSRF, RBAC, input validation, headers; CAS compliance (generic Cybersecurity Architecture Standard)" },
+    { id: "03-coding-conventions", name: "Coding Conventions", scope: "Naming, formatting, imports, error handling (Go + TS + Vue)" },
+    { id: "04-testing", name: "Testing", scope: "Unit/integration/E2E, coverage targets (backend 80%, frontend 70%)" },
+    { id: "05-accessibility", name: "Accessibility", scope: "WCAG 2.1 AA, keyboard, screen reader" },
+    { id: "06-pwa", name: "PWA", scope: "Manifest, service worker, install/update prompts" },
+    { id: "07-architectural-patterns", name: "Architectural Patterns", scope: "Simple / BFF / Enterprise pattern selection" }
+  ],
+
+  references: [
+    { id: "security-blueteam", name: "Security Blueteam",
+      purpose: "Defensive-assessment summary; pointer into the .claude/security/blueteam/ tree.",
+      loadedBy: "/blueteam" },
+    { id: "security-redteam", name: "Security Redteam",
+      purpose: "Offensive-assessment summary; pointer into the .claude/security/redteam/ tree.",
+      loadedBy: "/redteam" },
+    { id: "security-greenteam", name: "Security Greenteam",
+      purpose: "Code-review summary; pointer into the .claude/security/greenteam/ tree.",
+      loadedBy: "/greenteam" },
+    { id: "security-yellowteam", name: "Security Yellowteam",
+      purpose: "AI-smell review summary; pointer into the .claude/security/yellowteam/ tree.",
+      loadedBy: "/yellowteam" }
+  ],
+
+  templates: [
+    { id: "public", path: "template/public/",
+      stack: "Vue 3 + PrimeVue + Tailwind + Pinia frontend; Express + TypeScript + Postgres backend (JWT/CSRF/refresh, OAuth2, audit)",
+      use: "Full-stack template: copy and strip" }
+  ],
+
+  guides: [
+    { area: "Frontend",   path: "frontend/",       count: 12, summary: "01-12: project setup → routing → state → forms → testing → a11y → PWA" },
+    { area: "Backend Go",   path: "backend/golang/", count: 8, summary: "01-08: project setup → middleware → auth → DB → API → realtime → uploads → deployment" },
+    { area: "Backend Node", path: "backend/nodejs/", count: 8, summary: "01-08: project setup → middleware → auth → DB → API → realtime → uploads → deployment" }
+  ],
+
+  workspace: [
+    { path: "CLAUDE.md", note: "Crosswalk index: every asset, 1-line purpose, when to load. Auto-loaded on session start." },
+    { path: "README.md", note: "Human entry point: quick start, 8-phase flow, skills cheat-sheet." },
+    { path: "harness.html", note: "This file: visual instruction manual." },
+    { path: ".env", note: "Project-specific environment variables (if any)." },
+    { path: ".claude-plugin/plugin.json", note: "Plugin manifest stub (forward compatibility)." },
+    { path: ".claude/skills/", note: "15 skills: 8 phase (phase1-phase8) + 7 general (build, sync-docs, blueteam, redteam, greenteam, yellowteam, style-guide)." },
+    { path: ".claude/scripts/", note: "Harness utilities + eval gates: validate-step-output, validate-active-steps, check-harness-consistency, check-migration-idempotency, check-fr-coverage, check-nfr-coverage, check-evidence-strength, check-nav-completeness, check-test-presence, check-blueteam-pipeline, check-ia-section, check-no-silent-deferral, check-external-deps, check-step-gates, detect-active-step, record-gate-fire, check-security-gate, check-harness-sync, check-finding-codified. See #evals for the full inventory + which gate fires at which phase." },
+    { path: ".claude/state/", note: "Append-only audit trail of which gates fired (gate-state.jsonl). Gitignored." },
+    { path: ".claude/references/", note: "Cross-cutting docs: security-blueteam, security-redteam, security-greenteam, security-yellowteam." },
+    { path: ".claude/standards/", note: "7 cross-cutting standards (architecture, security, conventions, testing, a11y, PWA, patterns)." },
+    { path: ".claude/guides/", note: "28 sequential build guides (frontend × 12 + backend Go × 8 + backend Node × 8)." },
+    { path: ".claude/security/", note: "Four frameworks: blueteam (defensive), redteam (offensive), greenteam (code review), yellowteam (AI-smell prose audit)." },
+    { path: ".claude/harness-hooks.json", note: "Hooks snippet: copy into a project's .claude/settings.json to wire up auto drift + structural checks." },
+    { path: "template/", note: "Starter template (don't edit; updates land via harness upgrades)." },
+    { path: "app/", note: "Your code. Scaffolded by /build into ./app/. Never built from scratch." },
+    { path: "phases/", note: "Per-phase working dirs (inputs/ + output/) on the local filesystem." }
+  ],
+
+  extending: {
+    phaseStep: "MUST use phase<N>-<name> prefix (lowercase, hyphens, no underscores).",
+    generalSkill: "MUST NOT use a numeric prefix.",
+    files: [
+      "SKILL.md (the slash command, < 500 lines)",
+      "methodology.md (substantive analysis, auto-loaded when SKILL.md links it)",
+      "output-template.md (the structured deliverable's exact section skeleton)",
+      "examples/ (golden runs for regression reference)"
+    ],
+    afterCreate: [
+      "Update CLAUDE.md skill index table.",
+      "Update harness.html harnessData arrays (this file).",
+      "Run /sync-docs to confirm no drift."
+    ]
+  }
+};
+window.harnessData = harnessData;
+</script>
+
+<script>
+const { createApp, computed, ref } = Vue;
+
+const phaseLabel = { discovery: 'Discovery', build: 'Build', verify: 'Verify', ship: 'Ship', general: 'General' };
+
+const App = {
+  setup() {
+    const filter = ref('all');
+    const filteredPhases = computed(() =>
+      filter.value === 'all'
+        ? harnessData.phaseSkills
+        : harnessData.phaseSkills.filter(s => s.phase === filter.value));
+    const showPhases = computed(() => filter.value === 'all' || filter.value !== 'general');
+    const showGeneral  = computed(() => filter.value === 'all' || filter.value === 'general');
+
+    const evalStepFilter = ref('all');
+    const stdSearch   = ref('');
+    const tplSearch   = ref('');
+    const wsSearch    = ref('');
+    const refSearch   = ref('');
+    const guideSearch = ref('');
+
+    const filteredEvals = computed(() => {
+      if (evalStepFilter.value === 'all') return harnessData.evaluations;
+      return harnessData.evaluations.filter(e => e.fires.includes(evalStepFilter.value));
+    });
+    const filteredStandards = computed(() => {
+      const q = stdSearch.value.toLowerCase();
+      if (!q) return harnessData.standards;
+      return harnessData.standards.filter(s =>
+        s.name.toLowerCase().includes(q) || s.scope.toLowerCase().includes(q) || s.id.toLowerCase().includes(q));
+    });
+    const filteredTemplates = computed(() => {
+      const q = tplSearch.value.toLowerCase();
+      if (!q) return harnessData.templates;
+      return harnessData.templates.filter(t =>
+        t.stack.toLowerCase().includes(q) || t.use.toLowerCase().includes(q) || t.path.toLowerCase().includes(q));
+    });
+    const filteredWorkspace = computed(() => {
+      const q = wsSearch.value.toLowerCase();
+      if (!q) return harnessData.workspace;
+      return harnessData.workspace.filter(w =>
+        w.path.toLowerCase().includes(q) || w.note.toLowerCase().includes(q));
+    });
+    const filteredReferences = computed(() => {
+      const q = refSearch.value.toLowerCase();
+      if (!q) return harnessData.references;
+      return harnessData.references.filter(r =>
+        r.name.toLowerCase().includes(q) || r.purpose.toLowerCase().includes(q) || r.loadedBy.toLowerCase().includes(q));
+    });
+    const filteredGuides = computed(() => {
+      const q = guideSearch.value.toLowerCase();
+      if (!q) return harnessData.guides;
+      return harnessData.guides.filter(g =>
+        g.area.toLowerCase().includes(q) || g.summary.toLowerCase().includes(q));
+    });
+
+    return {
+      data: harnessData, filter, filteredPhases, showPhases, showGeneral, phaseLabel,
+      evalStepFilter, filteredEvals,
+      stdSearch, filteredStandards,
+      tplSearch, filteredTemplates,
+      wsSearch,  filteredWorkspace,
+      refSearch, filteredReferences,
+      guideSearch, filteredGuides
+    };
+  },
+  template: `
+    <div class="min-h-screen">
+      <header class="border-b border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+          <div class="flex items-start justify-between gap-4 flex-wrap mb-3">
+            <div class="flex items-center gap-3 text-xs uppercase tracking-wider text-slate-500">
+              <span class="px-2 py-0.5 bg-slate-100 rounded">Claude Code Harness</span>
+              <span>·</span>
+              <span>CC0 1.0 · Open source</span>
+            </div>
+            <button @click="exportMarkdown" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition-colors shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+              Export to Markdown
+            </button>
+          </div>
+          <h1 class="text-4xl font-bold tracking-tight text-slate-900">{{ data.meta.title }}</h1>
+          <p class="mt-2 text-lg text-slate-600">{{ data.meta.tagline }}</p>
+          <p class="mt-6 text-slate-700 max-w-4xl leading-relaxed">{{ data.meta.description }}</p>
+        </div>
+      </header>
+
+      <nav class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 flex flex-wrap gap-x-6 gap-y-2 py-3 text-sm">
+          <a href="#audience" class="text-slate-600 hover:text-slate-900">Who this is for</a>
+          <a href="#rules" class="text-slate-600 hover:text-slate-900">Rules</a>
+          <a href="#flow" class="text-slate-600 hover:text-slate-900">The 8-phase flow</a>
+          <a href="#evals" class="text-slate-600 hover:text-slate-900">Evals</a>
+          <a href="#skills" class="text-slate-600 hover:text-slate-900">Skills</a>
+          <a href="#standards" class="text-slate-600 hover:text-slate-900">Standards</a>
+          <a href="#guides" class="text-slate-600 hover:text-slate-900">Guides</a>
+          <a href="#references" class="text-slate-600 hover:text-slate-900">References</a>
+          <a href="#templates" class="text-slate-600 hover:text-slate-900">Templates</a>
+          <a href="#workspace" class="text-slate-600 hover:text-slate-900">Workspace</a>
+          <a href="#extend" class="text-slate-600 hover:text-slate-900">Extend</a>
+        </div>
+      </nav>
+
+      <main class="max-w-7xl mx-auto px-6 py-12 space-y-16">
+
+        <!-- Audience -->
+        <section id="audience" class="anchor-target">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 mb-4">Who this is for</h2>
+          <div class="grid md:grid-cols-3 gap-4">
+            <div v-for="a in data.meta.audience" :key="a.who" class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="text-sm font-semibold text-slate-900">{{ a.who }}</div>
+              <div class="mt-1 text-sm text-slate-600 leading-relaxed">{{ a.why }}</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Rules -->
+        <section id="rules" class="anchor-target">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 mb-4">Non-negotiable rules</h2>
+          <ol class="space-y-2">
+            <li v-for="(r, i) in data.meta.rules" :key="r.rule" class="bg-white rounded-lg p-4 border border-slate-200 flex gap-4">
+              <div class="text-slate-400 font-mono text-sm pt-0.5 w-6">{{ String(i+1).padStart(2,'0') }}</div>
+              <div>
+                <div class="font-semibold text-slate-900">{{ r.rule }}</div>
+                <div class="text-sm text-slate-600 mt-0.5">{{ r.detail }}</div>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- Flow -->
+        <section id="flow" class="anchor-target">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 mb-2">The 8-phase build lifecycle</h2>
+          <p class="text-slate-600 mb-6 max-w-3xl">Each phase hard-blocks if its required upstream artifact is missing. Each phase reads inputs from the prior phase's local <code class="text-xs">output/</code> dir, produces a structured <code class="text-xs">.md</code>, and runs <code class="text-xs">check-step-gates.mjs &lt;phase&gt;</code> before claiming done.</p>
+          <div class="bg-white rounded-xl border border-slate-200 p-6 overflow-x-auto">
+            <svg viewBox="0 0 1200 360" class="w-full min-w-[900px]" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+                </marker>
+                <marker id="arrowred" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+                </marker>
+              </defs>
+
+              <!-- Phase backgrounds -->
+              <rect x="20"  y="60" width="370" height="160" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+              <rect x="410" y="60" width="280" height="160" rx="10" fill="#ecfdf5" stroke="#a7f3d0"/>
+              <rect x="710" y="60" width="280" height="160" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+              <rect x="1010" y="60" width="170" height="160" rx="10" fill="#faf5ff" stroke="#ddd6fe"/>
+
+              <text x="205" y="85" text-anchor="middle" font-weight="700" fill="#1e3a8a" font-size="13">DISCOVERY</text>
+              <text x="550" y="85" text-anchor="middle" font-weight="700" fill="#065f46" font-size="13">BUILD</text>
+              <text x="850" y="85" text-anchor="middle" font-weight="700" fill="#92400e" font-size="13">VERIFY</text>
+              <text x="1095" y="85" text-anchor="middle" font-weight="700" fill="#5b21b6" font-size="13">SHIP</text>
+
+              <!-- Step nodes -->
+              <g v-for="(s, i) in data.phaseSkills" :key="s.id">
+                <rect :x="stepX(i)" y="120" width="110" height="70" rx="8" fill="white" :stroke="phaseStroke(s.phase)" stroke-width="2"/>
+                <text :x="stepX(i)+55" y="143" text-anchor="middle" font-weight="700" font-size="13" fill="#0f172a">phase{{ s.n }}</text>
+                <text :x="stepX(i)+55" y="161" text-anchor="middle" font-size="11" fill="#334155">{{ stepShortName(s.id) }}</text>
+                <text :x="stepX(i)+55" y="178" text-anchor="middle" font-size="9.5" fill="#64748b" font-family="JetBrains Mono, monospace">{{ s.output.split(' ')[0] }}</text>
+              </g>
+
+              <!-- Forward arrows -->
+              <g stroke="#475569" stroke-width="1.5" fill="none">
+                <line v-for="i in 7" :key="i" :x1="stepX(i-1)+110" y1="155" :x2="stepX(i)" y2="155" marker-end="url(#arrow)"/>
+              </g>
+
+              <!-- Send-back loop from phase6 → phase5 -->
+              <g stroke="#dc2626" stroke-width="1.5" fill="none" stroke-dasharray="5,3">
+                <path d="M 825 195 Q 825 260 605 260 Q 545 260 545 200" marker-end="url(#arrowred)"/>
+              </g>
+              <text x="700" y="278" text-anchor="middle" font-size="10.5" fill="#dc2626" font-style="italic">critical issue → send-back to phase5</text>
+
+              <!-- General skills row -->
+              <text x="20"  y="320" font-weight="700" font-size="12" fill="#475569">GENERAL SKILLS (tied in throughout):</text>
+              <g font-size="11" fill="#334155">
+                <rect x="285" y="305" width="70" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="320" y="320" text-anchor="middle">/build</text>
+                <rect x="365" y="305" width="90" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="410" y="320" text-anchor="middle">/sync-docs</text>
+                <rect x="465" y="305" width="80" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="505" y="320" text-anchor="middle">/blueteam</text>
+                <rect x="555" y="305" width="80" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="595" y="320" text-anchor="middle">/redteam</text>
+                <rect x="645" y="305" width="90" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="690" y="320" text-anchor="middle">/greenteam</text>
+                <rect x="745" y="305" width="100" height="22" rx="4" fill="white" stroke="#cbd5e1"/><text x="795" y="320" text-anchor="middle">/style-guide</text>
+              </g>
+
+              <!-- /build → phase5 -->
+              <line x1="320" y1="305" x2="490" y2="195" stroke="#059669" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+              <text x="380" y="248" font-size="9.5" fill="#059669" font-style="italic">scaffolds for</text>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Evaluations -->
+        <section id="evals" class="anchor-target">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 mb-2">Evals: the harness's truth-telling layer</h2>
+          <p class="text-slate-600 mb-6 max-w-4xl">Phases emit confident-sounding documents. Evals are scripts that fact-check those documents against the actual code, the actual artifacts, the actual behaviour. They are how the harness knows the work is real: and how Claude finds out about gaps it would otherwise have written around.</p>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-8">
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Philosophy 1: Evals expose what Claude misses</div>
+              <p class="text-sm text-slate-700 leading-relaxed">A SKILL.md instruction "must run /sync-docs" is a wish. A script that reads code and openapi.yaml and exits non-zero on drift is a fact. Evals replace prose obligations with code verdicts. When Claude marks a feature complete, the evals immediately re-check that claim against tech-stack-specific evidence: a missing nav link, a Lighthouse run that never happened, a translation file with no <code class="text-xs">$t()</code> call site, an empty test stub. Without evals, those gaps slip through and trigger send-backs days later.</p>
+            </div>
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Philosophy 2: When evals fail, build better evals</div>
+              <p class="text-sm text-slate-700 leading-relaxed">If a real failure mode (orphan page, deferred FR, unaccepted Critical finding) reaches a later step undetected, the answer is <em>not</em> simply to re-run the prior step. It is to add or strengthen an eval so the harness catches that class of failure mechanically next time. Each find sharpens the next build: gates are committed code that gets reviewed and improved like any other production asset. The eval set is meant to grow as the harness encounters new failure shapes across projects.</p>
+            </div>
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Philosophy 3: Evals are flexible to the work</div>
+              <p class="text-sm text-slate-700 leading-relaxed">Not every project needs every eval. A backend microservice doesn't need <code class="text-xs">check-nav-completeness</code>. A CLI tool doesn't need <code class="text-xs">NFR-PWA</code> evidence. A research spike may legitimately defer must-haves with explicit annotation. Each eval ships with adjustable thresholds, regexes, or category sets: and the gate set in <code class="text-xs">check-step-gates.mjs</code> is per-step, so a project can omit gates that don't apply to its shape of work.</p>
+            </div>
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Philosophy 4: Evals are dynamic, not finished</div>
+              <p class="text-sm text-slate-700 leading-relaxed">When implementation dishonesty is detected () the response is two-pronged: (a) review the SKILL.md / methodology.md / output-template.md upstream of the failure, since the gap was likely planted there; (b) write a new eval (or tighten an existing one) so the same failure cannot recur silently. Treat evals as code. They live alongside skills in <code class="text-xs">.claude/scripts/</code>; they get committed, reviewed, and improved.</p>
+            </div>
+          </div>
+
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">How evals surface evidence at every phase</h3>
+          <p class="text-slate-600 mb-4 max-w-4xl">A phase writes a confident claim; the gate set fires before the phase advance is allowed; each gate reads a different slice of the codebase and emits a verdict with concrete evidence. Failures don't bounce back as "incomplete": they bounce back with the specific file, line, or missing artifact that proves the claim was wrong.</p>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-4 overflow-x-auto mb-8">
+            <svg viewBox="0 0 1200 460" class="w-full min-w-[1000px]" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+              <defs>
+                <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+                </marker>
+                <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+                </marker>
+                <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+                </marker>
+              </defs>
+
+              <!-- Top: claim of completion -->
+              <rect x="425" y="20" width="350" height="64" rx="8" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/>
+              <text x="600" y="45" text-anchor="middle" font-weight="700" font-size="13" fill="#7c2d12">A phase claims completion</text>
+              <text x="600" y="63" text-anchor="middle" font-size="11" fill="#9a3412">development-report.md / test-results.md / sign-off.md / runbook.md</text>
+              <text x="600" y="78" text-anchor="middle" font-size="10" fill="#9a3412" font-style="italic">"FR-NNN complete · NFR-PERF covered · blueteam pass"</text>
+
+              <line x1="600" y1="84" x2="600" y2="116" stroke="#475569" stroke-width="1.5" marker-end="url(#arrowB)"/>
+
+              <!-- Middle: eval probes row -->
+              <text x="600" y="110" text-anchor="middle" font-size="11" font-weight="600" fill="#475569">check-step-gates.mjs fires the per-phase eval set</text>
+
+              <g font-size="10" fill="#0f172a">
+                <!-- Probe 1: FR coverage -->
+                <rect x="40"  y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="117" y="153" text-anchor="middle" font-weight="700" font-size="11">check-fr-coverage</text>
+                <text x="117" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads app/ + reports</text>
+                <text x="117" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: must-have FRs</text>
+                <text x="117" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">with no code citation</text>
+
+                <!-- Probe 2: Evidence strength -->
+                <rect x="210" y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="287" y="153" text-anchor="middle" font-weight="700" font-size="11">check-evidence-strength</text>
+                <text x="287" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads configs + code</text>
+                <text x="287" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: lighthouserc</text>
+                <text x="287" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">without a real run</text>
+
+                <!-- Probe 3: Nav completeness -->
+                <rect x="380" y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="457" y="153" text-anchor="middle" font-weight="700" font-size="11">check-nav-completeness</text>
+                <text x="457" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads router + layout</text>
+                <text x="457" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: orphan routes</text>
+                <text x="457" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">not in primary nav</text>
+
+                <!-- Probe 4: Blueteam pipeline -->
+                <rect x="550" y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="627" y="153" text-anchor="middle" font-weight="700" font-size="11">check-blueteam-pipeline</text>
+                <text x="627" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads .ai/data + .ai/reports</text>
+                <text x="627" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: scan ran but</text>
+                <text x="627" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">HTML/RA missing</text>
+
+                <!-- Probe 5: Test presence -->
+                <rect x="720" y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="797" y="153" text-anchor="middle" font-weight="700" font-size="11">check-test-presence</text>
+                <text x="797" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads app/test/</text>
+                <text x="797" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: empty stubs,</text>
+                <text x="797" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">FR-untraceable specs</text>
+
+                <!-- Probe 6: No silent deferrals -->
+                <rect x="890" y="135" width="155" height="80" rx="6" fill="#ecfdf5" stroke="#6ee7b7"/>
+                <text x="967" y="153" text-anchor="middle" font-weight="700" font-size="11">check-no-silent-deferral</text>
+                <text x="967" y="169" text-anchor="middle" font-size="9" fill="#475569" font-family="JetBrains Mono, monospace">reads step reports</text>
+                <text x="967" y="187" text-anchor="middle" font-size="9.5" fill="#065f46">finds: "deferred" near</text>
+                <text x="967" y="200" text-anchor="middle" font-size="9.5" fill="#065f46">FR with no paper trail</text>
+
+                <!-- ... etc. small note about more -->
+                <rect x="1060" y="135" width="110" height="80" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-dasharray="3,2"/>
+                <text x="1115" y="155" text-anchor="middle" font-size="10" fill="#475569">+ check-ia-section,</text>
+                <text x="1115" y="168" text-anchor="middle" font-size="10" fill="#475569">migration-idem,</text>
+                <text x="1115" y="181" text-anchor="middle" font-size="10" fill="#475569">external-deps,</text>
+                <text x="1115" y="194" text-anchor="middle" font-size="10" fill="#475569">sync-docs,</text>
+                <text x="1115" y="207" text-anchor="middle" font-size="10" fill="#475569">validate-output</text>
+              </g>
+
+              <!-- Arrows down to outcomes -->
+              <line x1="350" y1="220" x2="350" y2="265" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowG)"/>
+              <line x1="850" y1="220" x2="850" y2="265" stroke="#dc2626" stroke-width="1.5" marker-end="url(#arrowR)"/>
+
+              <!-- Bottom-left: PASS -->
+              <rect x="60" y="270" width="580" height="155" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="1.5"/>
+              <text x="80" y="294" font-weight="700" font-size="13" fill="#065f46">▶ ALL GATES GREEN</text>
+              <text x="80" y="316" font-size="11" fill="#0f172a">• Phase advances to the next phase.</text>
+              <text x="80" y="334" font-size="11" fill="#0f172a">• record-gate-fire.mjs appends a row to .claude/state/gate-state.jsonl.</text>
+              <text x="80" y="352" font-size="11" fill="#0f172a">• Gate receipts written locally as audit trail (per-phase gate-receipts.md).</text>
+              <text x="80" y="370" font-size="11" fill="#0f172a">• check-no-silent-deferral confirms no deferrals slipped past prose review.</text>
+              <text x="80" y="388" font-size="11" fill="#0f172a">• Module progresses to the next phase.</text>
+              <text x="80" y="412" font-size="10" fill="#047857" font-style="italic">The claim was real. The harness has the receipts.</text>
+
+              <!-- Bottom-right: FAIL -->
+              <rect x="660" y="270" width="510" height="155" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+              <text x="680" y="294" font-weight="700" font-size="13" fill="#7f1d1d">▶ ANY GATE RED</text>
+              <text x="680" y="316" font-size="11" fill="#0f172a">• Phase advance is blocked. The script exits non-zero with a clear error.</text>
+              <text x="680" y="334" font-size="11" fill="#0f172a">• The eval surfaces the specific evidence: file, line, missing artifact.</text>
+              <text x="680" y="352" font-size="11" fill="#0f172a">• Two-pronged response:</text>
+              <text x="700" y="370" font-size="11" fill="#0f172a">a) <tspan font-weight="600">Fix the gap</tspan>: wire the nav, run Lighthouse, generate the HTML, etc.</text>
+              <text x="700" y="388" font-size="11" fill="#0f172a">b) <tspan font-weight="600">Strengthen the eval</tspan> if the failure mode wasn't in the gate set.</text>
+              <text x="680" y="412" font-size="10" fill="#991b1b" font-style="italic">Evals improve. Each find points to a stronger probe for next time.</text>
+            </svg>
+          </div>
+
+          <h3 class="text-lg font-semibold text-slate-900 mb-2">Where each eval fires</h3>
+          <p class="text-slate-600 mb-4 max-w-4xl">A dot under a phase means that eval is part of the phase's gate set in <code class="text-xs">check-step-gates.mjs</code>. The "surfaces" column is what the eval extracts from the codebase to either confirm the phase's claim or reveal the gap.</p>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-4 overflow-x-auto mb-6">
+            <svg viewBox="0 0 1200 580" class="w-full min-w-[1000px]" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+              <defs>
+                <linearGradient id="evalDot" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#10b981"/>
+                  <stop offset="100%" stop-color="#059669"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Header: phase columns -->
+              <g font-size="11" font-weight="700" fill="#0f172a">
+                <text x="180" y="20" font-size="12" font-weight="700" fill="#475569">EVAL ↓ &nbsp; PHASE →</text>
+                <text x="280" y="20" text-anchor="middle">p1</text>
+                <text x="350" y="20" text-anchor="middle">p2</text>
+                <text x="420" y="20" text-anchor="middle">p3</text>
+                <text x="490" y="20" text-anchor="middle">p4</text>
+                <text x="560" y="20" text-anchor="middle">p5</text>
+                <text x="630" y="20" text-anchor="middle">p6</text>
+                <text x="700" y="20" text-anchor="middle">p7</text>
+                <text x="770" y="20" text-anchor="middle">p8</text>
+                <text x="900" y="20" font-size="12" fill="#475569">SURFACES</text>
+              </g>
+              <!-- Phase tinted backgrounds for the columns -->
+              <rect x="245" y="30" width="210" height="530" fill="#eff6ff" opacity="0.45"/>
+              <rect x="455" y="30" width="140" height="530" fill="#ecfdf5" opacity="0.45"/>
+              <rect x="595" y="30" width="140" height="530" fill="#fffbeb" opacity="0.45"/>
+              <rect x="735" y="30" width="70"  height="530" fill="#faf5ff" opacity="0.45"/>
+
+              <!-- Eval rows -->
+              <g v-for="(e, i) in data.evaluations" :key="e.id" :transform="evalRowTransform(i)">
+                <text x="20" y="22" font-size="11" font-weight="600" fill="#0f172a">{{ e.name }}</text>
+                <text x="20" y="36" font-size="9.5" fill="#64748b" font-family="JetBrains Mono, monospace">{{ evalShortPath(e.script) }}</text>
+
+                <!-- Dots per step -->
+                <g v-for="(stepId, j) in evalStepIds" :key="stepId">
+                  <circle :cx="280 + j*70" cy="28"
+                          :r="e.fires.includes(stepId) ? 7 : 3"
+                          :fill="e.fires.includes(stepId) ? 'url(#evalDot)' : '#e2e8f0'"
+                          :stroke="e.fires.includes(stepId) ? '#059669' : '#cbd5e1'"
+                          stroke-width="1"/>
+                </g>
+
+                <!-- Surfaces text (truncated) -->
+                <text x="820" y="28" font-size="10" fill="#334155">{{ truncate(e.surfaces, 64) }}</text>
+
+                <!-- Row separator -->
+                <line x1="0" x2="1180" y1="48" y2="48" stroke="#f1f5f9" stroke-width="1"/>
+              </g>
+
+              <!-- Footer note -->
+              <text x="20" y="572" font-size="10" fill="#64748b" font-style="italic">
+                Filled green dot = gate fires for that phase. The same eval can fire multiple times across the lifecycle (e.g., FR coverage at phase5, re-checked at phase7 and phase8).
+              </text>
+            </svg>
+          </div>
+
+          <div class="flex items-center justify-between mb-2 flex-wrap gap-3">
+            <h3 class="text-lg font-semibold text-slate-900">Current eval inventory</h3>
+            <div class="flex flex-wrap gap-1 text-xs">
+              <button v-for="f in ['all','phase1','phase2','phase3','phase4','phase5','phase6','phase7','phase8']" :key="f"
+                @click="evalStepFilter = f"
+                :class="['px-2.5 py-1 rounded-full border', evalStepFilter===f ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300']">
+                {{ f === 'all' ? 'All phases' : f }}
+              </button>
+            </div>
+          </div>
+          <p class="text-slate-600 mb-4 max-w-4xl">Each card lists what the eval surfaces, where it fires in the lifecycle, and how to flex it to the kind of work you're doing.</p>
+          <div class="grid lg:grid-cols-2 gap-4 mb-8">
+            <div v-for="e in filteredEvals" :key="e.id" class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <span class="text-sm font-semibold text-slate-900">{{ e.name }}</span>
+                <code class="text-xs text-slate-500">{{ evalShortPath(e.script) }}</code>
+              </div>
+              <div class="mt-2 flex flex-wrap gap-1">
+                <span v-for="step in e.fires" :key="step"
+                      class="text-xs font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">{{ step }}</span>
+              </div>
+              <div class="mt-3">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Surfaces</div>
+                <p class="text-sm text-slate-700 leading-relaxed">{{ e.surfaces }}</p>
+              </div>
+              <div class="mt-3">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Flexibility</div>
+                <p class="text-sm text-slate-600 leading-relaxed">{{ e.flexibility }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-5">
+            <div class="text-sm font-semibold text-amber-900 mb-1">When you find dishonesty in a build</div>
+            <p class="text-sm text-amber-900 leading-relaxed">
+              Deferred items, failed implementations, or gates passing without real completion mean two things at once: (1) something in a SKILL.md / methodology.md / output-template.md gave the failure a place to hide; (2) the eval set didn't have a probe pointed at it. Fix both: review the upstream skill files, then add or strengthen the matching eval. The harness only stays honest if the eval set keeps pace with the failure modes you're actually seeing.
+            </p>
+          </div>
+        </section>
+
+        <!-- Skills -->
+        <section id="skills" class="anchor-target">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Skills</h2>
+            <div class="flex gap-1 text-xs">
+              <button v-for="f in ['all','discovery','build','verify','ship','general']" :key="f"
+                @click="filter = f"
+                :class="['px-3 py-1.5 rounded-full border', filter===f ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300']">
+                {{ f === 'all' ? 'All' : phaseLabel[f] }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="showPhases" class="space-y-3">
+            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Phase skills (phase1-phase8)</h3>
+            <div class="grid lg:grid-cols-2 gap-4">
+              <div v-for="s in filteredPhases" :key="s.id"
+                   :class="['bg-white rounded-lg p-5 border border-slate-200', 'ring-' + s.phase]">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                  <div class="flex items-center gap-2">
+                    <span :class="['text-xs font-semibold px-2 py-0.5 rounded uppercase tracking-wider', 'badge-' + s.phase]">phase{{ s.n }} · {{ phaseLabel[s.phase] }}</span>
+                    <code class="text-sm font-medium text-slate-900">{{ s.slash }}</code>
+                  </div>
+                  <a :href="'#extend'" class="text-xs text-slate-400 hover:text-slate-700">→ extend</a>
+                </div>
+                <p class="mt-3 text-sm text-slate-700 leading-relaxed">{{ s.purpose }}</p>
+                <div class="mt-4 grid sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <div class="font-semibold text-slate-500 uppercase tracking-wider mb-1">Inputs</div>
+                    <ul class="text-slate-700 space-y-0.5"><li v-for="i in s.inputs" :key="i">· {{ i }}</li></ul>
+                  </div>
+                  <div>
+                    <div class="font-semibold text-slate-500 uppercase tracking-wider mb-1">Output</div>
+                    <code class="text-xs text-slate-700">{{ s.output }}</code>
+                    <div v-if="s.requires.length" class="mt-2">
+                      <div class="font-semibold text-slate-500 uppercase tracking-wider mb-1">Requires (hard-block)</div>
+                      <ul class="text-slate-700 space-y-0.5"><li v-for="r in s.requires" :key="r">· /{{ r }}</li></ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 grid sm:grid-cols-2 gap-3 text-xs">
+                  <div v-if="s.methodology">
+                    <div class="font-semibold text-slate-400 uppercase tracking-wider mb-1">Source folder</div>
+                    <a :href="'./' + skillSourceFolder(s)" target="_blank"
+                       class="font-mono text-blue-600 hover:text-blue-800 hover:underline break-all">{{ skillSourceFolder(s) }}</a>
+                  </div>
+                  <div v-if="s.outputPath">
+                    <div class="font-semibold text-slate-400 uppercase tracking-wider mb-1">Destination folder</div>
+                    <a :href="'./' + skillDestFolder(s)" target="_blank"
+                       class="font-mono text-emerald-600 hover:text-emerald-800 hover:underline break-all">{{ skillDestFolder(s) }}</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="showGeneral" class="mt-8 space-y-3">
+            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">General skills (no prefix)</h3>
+            <div class="grid lg:grid-cols-2 gap-4">
+              <div v-for="s in data.generalSkills" :key="s.id"
+                   class="bg-white rounded-lg p-5 border border-slate-200 ring-general">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded uppercase tracking-wider badge-general">general</span>
+                  <code class="text-sm font-medium text-slate-900">{{ s.slash }}</code>
+                </div>
+                <p class="mt-3 text-sm text-slate-700 leading-relaxed">{{ s.purpose }}</p>
+                <div class="mt-3 text-xs text-slate-600"><span class="font-semibold text-slate-500 uppercase tracking-wider mr-2">When</span> {{ s.use }}</div>
+                <div v-if="s.args" class="mt-3 text-xs">
+                  <div class="font-semibold text-slate-500 uppercase tracking-wider mb-1">Usage</div>
+                  <ul class="font-mono text-slate-700 space-y-0.5"><li v-for="a in s.args" :key="a">· {{ s.slash }} {{ a }}</li></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Standards -->
+        <section id="standards" class="anchor-target">
+          <div class="flex items-start justify-between gap-4 mb-4 flex-wrap">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Standards</h2>
+              <p class="text-slate-600 mt-1 max-w-3xl">Cross-cutting requirements: apply throughout development, not once. Located at <code class="text-sm">.claude/standards/</code>.</p>
+            </div>
+            <input v-model="stdSearch" type="search" placeholder="Filter standards…"
+                   class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 w-44 shrink-0">
+          </div>
+          <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-2 font-semibold">File</th>
+                  <th class="text-left px-4 py-2 font-semibold">Standard</th>
+                  <th class="text-left px-4 py-2 font-semibold">Scope</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="s in filteredStandards" :key="s.id">
+                  <td class="px-4 py-2 mono text-xs">
+                    <a :href="'./.claude/standards/' + s.id + '.md'" target="_blank"
+                       class="text-blue-600 hover:text-blue-800 hover:underline">{{ s.id }}.md</a>
+                  </td>
+                  <td class="px-4 py-2 font-medium text-slate-900">{{ s.name }}</td>
+                  <td class="px-4 py-2 text-slate-700">{{ s.scope }}</td>
+                </tr>
+                <tr v-if="filteredStandards.length === 0">
+                  <td colspan="3" class="px-4 py-4 text-slate-400 text-center text-sm">No standards match "{{ stdSearch }}"</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Guides -->
+        <section id="guides" class="anchor-target">
+          <div class="flex items-start justify-between gap-4 mb-4 flex-wrap">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Guides</h2>
+              <p class="text-slate-600 mt-1 max-w-3xl">Sequential implementation references: load them in order during /phase5-development. Located at <code class="text-sm">.claude/guides/</code>.</p>
+            </div>
+            <input v-model="guideSearch" type="search" placeholder="Filter guides…"
+                   class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 w-44 shrink-0">
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div v-for="g in filteredGuides" :key="g.area" class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <div class="font-semibold text-slate-900">{{ g.area }}</div>
+                <a :href="'./.claude/guides/' + g.path" target="_blank"
+                   class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-mono">{{ g.path }}</a>
+                <span class="text-xs text-slate-400">{{ g.count }} guides</span>
+              </div>
+              <p class="mt-2 text-sm text-slate-700">{{ g.summary }}</p>
+            </div>
+            <div v-if="filteredGuides.length === 0" class="sm:col-span-2 text-slate-400 text-center text-sm py-4">No guides match "{{ guideSearch }}"</div>
+          </div>
+        </section>
+
+        <!-- References -->
+        <section id="references" class="anchor-target">
+          <div class="flex items-start justify-between gap-4 mb-4 flex-wrap">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Reference docs</h2>
+              <p class="text-slate-600 mt-1 max-w-3xl">Cross-cutting knowledge that any skill can link to. Located at <code class="text-sm">.claude/references/</code>.</p>
+            </div>
+            <input v-model="refSearch" type="search" placeholder="Filter references…"
+                   class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 w-44 shrink-0">
+          </div>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <div v-for="r in filteredReferences" :key="r.id" class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="flex items-baseline gap-2 flex-wrap">
+                <div class="font-semibold text-slate-900">{{ r.name }}</div>
+                <a :href="'./.claude/references/' + r.id + '.md'" target="_blank"
+                   class="text-xs text-blue-600 hover:text-blue-800 hover:underline font-mono">{{ r.id }}.md</a>
+              </div>
+              <p class="mt-2 text-sm text-slate-700 leading-relaxed">{{ r.purpose }}</p>
+              <div class="mt-3 text-xs text-slate-500"><span class="font-semibold uppercase tracking-wider mr-1">Loaded by</span> {{ r.loadedBy }}</div>
+            </div>
+            <div v-if="filteredReferences.length === 0" class="lg:col-span-2 text-slate-400 text-center text-sm py-4">No references match "{{ refSearch }}"</div>
+          </div>
+        </section>
+
+        <!-- Templates -->
+        <section id="templates" class="anchor-target">
+          <div class="flex items-start justify-between gap-4 mb-4 flex-wrap">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Templates</h2>
+              <p class="text-slate-600 mt-1 max-w-3xl">Always copy from these via <code class="text-sm">/build</code>. Never scaffold by hand.</p>
+            </div>
+            <input v-model="tplSearch" type="search" placeholder="Filter templates…"
+                   class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 w-44 shrink-0">
+          </div>
+          <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-2 font-semibold">Path</th>
+                  <th class="text-left px-4 py-2 font-semibold">Stack</th>
+                  <th class="text-left px-4 py-2 font-semibold">Use when</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="t in filteredTemplates" :key="t.id">
+                  <td class="px-4 py-2 mono text-xs">
+                    <a :href="'./' + t.path" target="_blank"
+                       class="text-blue-600 hover:text-blue-800 hover:underline">{{ t.path }}</a>
+                  </td>
+                  <td class="px-4 py-2 text-slate-700">{{ t.stack }}</td>
+                  <td class="px-4 py-2 text-slate-700">{{ t.use }}</td>
+                </tr>
+                <tr v-if="filteredTemplates.length === 0">
+                  <td colspan="3" class="px-4 py-4 text-slate-400 text-center text-sm">No templates match "{{ tplSearch }}"</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Workspace -->
+        <section id="workspace" class="anchor-target">
+          <div class="flex items-start justify-between gap-4 mb-2 flex-wrap">
+            <div>
+              <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Workspace</h2>
+              <p class="text-slate-600 mt-1 max-w-3xl">Every harness asset, with its purpose. Driven by <code class="text-xs">harnessData.workspace</code>: adding a new top-level file or dir means adding one row to that array.</p>
+            </div>
+            <input v-model="wsSearch" type="search" placeholder="Filter workspace…"
+                   class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 w-44 shrink-0">
+          </div>
+          <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-2 font-semibold w-1/3">Path</th>
+                  <th class="text-left px-4 py-2 font-semibold">Purpose</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="w in filteredWorkspace" :key="w.path">
+                  <td class="px-4 py-2 mono text-xs align-top">
+                    <a :href="'./' + w.path" target="_blank"
+                       class="text-blue-600 hover:text-blue-800 hover:underline">{{ w.path }}</a>
+                  </td>
+                  <td class="px-4 py-2 text-slate-700">{{ w.note }}</td>
+                </tr>
+                <tr v-if="filteredWorkspace.length === 0">
+                  <td colspan="2" class="px-4 py-4 text-slate-400 text-center text-sm">No workspace items match "{{ wsSearch }}"</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-slate-600 mt-4 max-w-3xl">Phase outputs land in <code>./phases/&lt;phase&gt;/output/</code> on the local filesystem (version-controllable). Each phase reads the prior phase's output from the same tree.</p>
+        </section>
+
+        <!-- Extend -->
+        <section id="extend" class="anchor-target">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900 mb-4">How to extend</h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="font-semibold text-slate-900 mb-2">Naming</div>
+              <ul class="text-sm text-slate-700 space-y-1">
+                <li>· <strong>Phase skill:</strong> {{ data.extending.phaseStep }}</li>
+                <li>· <strong>General skill:</strong> {{ data.extending.generalSkill }}</li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-lg p-5 border border-slate-200">
+              <div class="font-semibold text-slate-900 mb-2">Files inside <code class="text-xs">.claude/skills/&lt;name&gt;/</code></div>
+              <ul class="text-sm text-slate-700 space-y-1">
+                <li v-for="f in data.extending.files" :key="f">· <code class="text-xs">{{ f }}</code></li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-lg p-5 border border-slate-200 md:col-span-2">
+              <div class="font-semibold text-slate-900 mb-2">After creating the skill</div>
+              <ol class="text-sm text-slate-700 space-y-1 list-decimal list-inside">
+                <li v-for="step in data.extending.afterCreate" :key="step">{{ step }}</li>
+              </ol>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="border-t border-slate-200 bg-white">
+        <div class="max-w-7xl mx-auto px-6 py-8 text-sm text-slate-500 flex flex-wrap gap-4 justify-between">
+          <div>Claude Build Harness · CC0 1.0 · Open source</div>
+          <div>Driven by <code class="text-xs">harnessData</code> in this file. To extend, edit the JSON and refresh.</div>
+        </div>
+      </footer>
+    </div>
+  `,
+  computed: {
+    evalStepIds() { return ['phase1','phase2','phase3','phase4','phase5','phase6','phase7','phase8']; }
+  },
+  methods: {
+    stepX(i) { return 35 + i * 145; },
+    phaseStroke(p) { return ({discovery:'#2563eb', build:'#059669', verify:'#d97706', ship:'#7c3aed'})[p] || '#475569'; },
+    stepShortName(id) { return id.replace(/^phase\d+-/, '').replace(/-/g, ' '); },
+    evalRowTransform(i) { return `translate(0, ${40 + i * 40})`; },
+    evalShortPath(p) { return p.replace(/^\.claude\/(scripts|skills)\//, ''); },
+    truncate(s, n) { return s.length > n ? s.slice(0, n - 1).trim() + '…' : s; },
+    skillSourceFolder(s) {
+      if (!s.methodology) return null;
+      return s.methodology.split('/').slice(0, -1).join('/') + '/';
+    },
+    skillDestFolder(s) {
+      if (!s.outputPath) return null;
+      return s.outputPath.split('/').slice(0, -1).join('/') + '/';
+    },
+    exportMarkdown() {
+      const d = harnessData;
+      const date = new Date().toISOString().split('T')[0];
+      let md = `# ${d.meta.title}\n\n> ${d.meta.tagline}\n\n${d.meta.description}\n\n---\n\n`;
+
+      md += `## Who This Is For\n\n`;
+      d.meta.audience.forEach(a => { md += `**${a.who}**: ${a.why}\n\n`; });
+
+      md += `## Non-Negotiable Rules\n\n`;
+      d.meta.rules.forEach((r, i) => { md += `${i + 1}. **${r.rule}**: ${r.detail}\n`; });
+      md += '\n';
+
+      md += `## The 8-Phase Build Lifecycle\n\n`;
+      md += `| Phase | Slash | Group | Output | Requires |\n|---|---|---|---|---|\n`;
+      d.phaseSkills.forEach(s => {
+        md += `| phase${s.n} | \`${s.slash}\` | ${s.phase} | \`${s.output}\` | ${s.requires.join(', ') || '-'} |\n`;
+      });
+      md += '\n';
+
+      md += `## Phase Skill Detail\n\n`;
+      d.phaseSkills.forEach(s => {
+        const srcFolder = s.methodology ? s.methodology.split('/').slice(0, -1).join('/') + '/' : null;
+        const dstFolder = s.outputPath  ? s.outputPath.split('/').slice(0, -1).join('/') + '/'  : null;
+        md += `### phase${s.n}: \`${s.slash}\` (${s.phase})\n\n${s.purpose}\n\n`;
+        md += `- **Inputs:** ${s.inputs.join('; ')}\n`;
+        md += `- **Output:** \`${s.output}\`\n`;
+        if (dstFolder) md += `- **Destination folder:** \`${dstFolder}\`\n`;
+        if (srcFolder) md += `- **Source folder:** \`${srcFolder}\`\n`;
+        if (s.requires.length) md += `- **Requires:** ${s.requires.map(r => '/' + r).join(', ')}\n`;
+        md += '\n';
+      });
+
+      md += `## Evaluations\n\n`;
+      md += `| Eval | Script | Fires at | Surfaces |\n|---|---|---|---|\n`;
+      d.evaluations.forEach(e => {
+        md += `| **${e.name}** | \`${e.script.replace(/^\.claude\/(scripts|skills)\//, '')}\` | ${e.fires.join(', ')} | ${e.surfaces} |\n`;
+      });
+      md += '\n';
+
+      md += `## General Skills\n\n`;
+      d.generalSkills.forEach(s => {
+        md += `### \`${s.slash}\`\n\n${s.purpose}\n\n**When:** ${s.use}\n\n`;
+        if (s.args) { md += `**Usage:**\n`; s.args.forEach(a => { md += `- \`${s.slash} ${a}\`\n`; }); md += '\n'; }
+      });
+
+      md += `## Standards\n\n> Located at \`.claude/standards/\`\n\n`;
+      md += `| Standard | File | Scope |\n|---|---|---|\n`;
+      d.standards.forEach(s => { md += `| **${s.name}** | \`.claude/standards/${s.id}.md\` | ${s.scope} |\n`; });
+      md += '\n';
+
+      md += `## Guides\n\n> Located at \`.claude/guides/\`\n\n`;
+      d.guides.forEach(g => { md += `### ${g.area}: \`${g.path}\` (${g.count} guides)\n\n${g.summary}\n\n`; });
+
+      md += `## Reference Docs\n\n> Located at \`.claude/references/\`\n\n`;
+      d.references.forEach(r => { md += `### ${r.name}: \`.claude/references/${r.id}.md\`\n\n${r.purpose}\n\n**Loaded by:** ${r.loadedBy}\n\n`; });
+
+      md += `## Templates\n\n`;
+      md += `| Path | Stack | Use when |\n|---|---|---|\n`;
+      d.templates.forEach(t => { md += `| \`${t.path}\` | ${t.stack} | ${t.use} |\n`; });
+      md += '\n';
+
+      md += `## Workspace\n\n`;
+      md += `| Path | Purpose |\n|---|---|\n`;
+      d.workspace.forEach(w => { md += `| \`${w.path}\` | ${w.note} |\n`; });
+      md += '\n';
+
+      md += `## How to Extend\n\n`;
+      md += `**Phase skill naming:** ${d.extending.phaseStep}\n\n`;
+      md += `**General skill naming:** ${d.extending.generalSkill}\n\n`;
+      md += `**Required files in \`.claude/skills/<name>/\`:**\n\n`;
+      d.extending.files.forEach(f => { md += `- \`${f}\`\n`; });
+      md += '\n';
+      md += `**After creating the skill:**\n\n`;
+      d.extending.afterCreate.forEach((step, i) => { md += `${i + 1}. ${step}\n`; });
+      md += '\n';
+
+      md += `---\n\n*Generated from Claude Build Harness · ${date} · CC0 1.0 · Open source*\n`;
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = `claude-build-harness-${date}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }
+};
+
+createApp(App).mount('#app');
+</script>
+
+</body>
+</html>
